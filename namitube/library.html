@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Library - NamiTube</title>
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    .library-tabs { display: flex; gap: 8px; padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .library-tab { padding: 12px 20px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all var(--transition-fast); background: none; }
+    .library-tab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+    .library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 0 24px; }
+    .empty-state { text-align: center; padding: 80px 24px; }
+    .empty-state svg { width: 64px; height: 64px; color: var(--text-muted); margin-bottom: 16px; }
+    .empty-state h3 { font-size: 20px; margin-bottom: 8px; }
+    .empty-state p { color: var(--text-secondary); margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+  <main id="main-content" style="padding-top: calc(var(--header-height) + 40px);">
+    <div class="page-header">
+      <h1 class="page-title">My Library</h1>
+    </div>
+    <div class="library-tabs">
+      <button class="library-tab active" onclick="LibraryPage.showTab('continue')">Continue Watching</button>
+      <button class="library-tab" onclick="LibraryPage.showTab('watchlist')">Watchlist</button>
+      <button class="library-tab" onclick="LibraryPage.showTab('favorites')">Favorites</button>
+      <button class="library-tab" onclick="LibraryPage.showTab('history')">History</button>
+    </div>
+    <div id="libraryContent">
+      <div class="library-grid" id="libraryGrid"></div>
+    </div>
+  </main>
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const LibraryPage = {
+      currentTab: 'continue',
+      init() {
+        this.showTab('continue');
+      },
+      showTab(tab) {
+        this.currentTab = tab;
+        document.querySelectorAll('.library-tab').forEach(t => t.classList.remove('active'));
+        const clicked = Array.from(document.querySelectorAll('.library-tab')).find(t => t.textContent.toLowerCase().includes(tab === 'continue' ? 'continue' : tab));
+        if (clicked) clicked.classList.add('active');
+        const grid = document.getElementById('libraryGrid');
+        let items = [];
+        switch(tab) {
+          case 'continue':
+            items = Storage.getContinueWatching();
+            if (!items.length) {
+              grid.innerHTML = this.emptyState('No anime in progress', 'Start watching to see content here', 'home.html');
+              return;
+            }
+            grid.innerHTML = items.map(item => `
+              <div class="anime-card" onclick="window.location.href='watch.html?id=${item.malId}&ep=${item.episode}&lang=${item.language}'">
+                <img src="${item.image}" alt="${escapeHtml(item.title)}" class="anime-card-image" loading="lazy">
+                <div class="anime-card-overlay">
+                  <div class="anime-card-title">${escapeHtml(item.title)}</div>
+                  <div class="anime-card-meta">Ep ${item.episode} &bull; ${item.progress}% watched</div>
+                </div>
+              </div>
+            `).join('');
+            break;
+          case 'watchlist':
+            items = Storage.getWatchlist();
+            if (!items.length) {
+              grid.innerHTML = this.emptyState('Watchlist is empty', 'Add anime to track what you want to watch', 'home.html');
+              return;
+            }
+            grid.innerHTML = items.map(item => `
+              <div class="anime-card" onclick="window.location.href='anime.html?id=${item.malId}'">
+                <img src="${item.image}" alt="${escapeHtml(item.title)}" class="anime-card-image" loading="lazy">
+                <div class="anime-card-overlay">
+                  <div class="anime-card-title">${escapeHtml(item.title)}</div>
+                  <div class="anime-card-meta">${item.status.replace(/_/g, ' ')}</div>
+                </div>
+              </div>
+            `).join('');
+            break;
+          case 'favorites':
+            items = Storage.getFavorites();
+            if (!items.length) {
+              grid.innerHTML = this.emptyState('No favorites yet', 'Heart your favorite anime to see them here', 'home.html');
+              return;
+            }
+            grid.innerHTML = items.map(item => `
+              <div class="anime-card" onclick="window.location.href='anime.html?id=${item.malId}'">
+                <img src="${item.image}" alt="${escapeHtml(item.title)}" class="anime-card-image" loading="lazy">
+                <div class="anime-card-overlay">
+                  <div class="anime-card-title">${escapeHtml(item.title)}</div>
+                </div>
+              </div>
+            `).join('');
+            break;
+          case 'history':
+            items = Storage.getHistory().slice(0, 50);
+            if (!items.length) {
+              grid.innerHTML = this.emptyState('No watch history', 'Your watched episodes will appear here', 'home.html');
+              return;
+            }
+            grid.innerHTML = items.map(item => `
+              <div class="anime-card" onclick="window.location.href='watch.html?id=${item.malId}&ep=${item.episode}&lang=${item.language}'">
+                <img src="${item.image}" alt="${escapeHtml(item.title)}" class="anime-card-image" loading="lazy">
+                <div class="anime-card-overlay">
+                  <div class="anime-card-title">${escapeHtml(item.title)}</div>
+                  <div class="anime-card-meta">Ep ${item.episode} &bull; ${new Date(item.timestamp).toLocaleDateString()}</div>
+                </div>
+              </div>
+            `).join('');
+            break;
+        }
+      },
+      emptyState(title, desc, link) {
+        return `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <h3>${title}</h3>
+            <p>${desc}</p>
+            <a href="${link}" class="btn btn-primary">Browse Anime</a>
+          </div>
+        `;
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => LibraryPage.init());
+  </script>
+</body>
+</html>

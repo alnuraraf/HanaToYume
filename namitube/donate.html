@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support NamiTube</title>
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    .donate-hero { text-align: center; padding: 100px 24px 60px; max-width: 600px; margin: 0 auto; }
+    .donate-heart { width: 64px; height: 64px; color: var(--accent); margin: 0 auto 24px; }
+    .donate-title { font-size: 32px; font-weight: 800; margin-bottom: 16px; }
+    .donate-desc { color: var(--text-secondary); line-height: 1.6; margin-bottom: 40px; }
+    .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; margin: 0 auto; padding: 0 24px 60px; }
+    .tier { background: var(--bg-card); border-radius: var(--radius-lg); padding: 32px 24px; text-align: center; border: 1px solid var(--border); transition: transform var(--transition-base); }
+    .tier:hover { transform: translateY(-4px); border-color: var(--text-muted); }
+    .tier-icon { width: 40px; height: 40px; color: var(--accent); margin: 0 auto 16px; }
+    .tier-price { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+    .tier-name { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .tier-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+    .transparency { max-width: 600px; margin: 0 auto; padding: 0 24px 60px; }
+    .progress-bar-wrap { background: var(--bg-elevated); border-radius: 100px; height: 8px; margin: 16px 0; overflow: hidden; }
+    .progress-bar-fill { background: var(--accent); height: 100%; border-radius: 100px; width: 45%; }
+    @media (max-width: 767px) { .tiers { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main id="main-content" style="padding-top: var(--header-height);">
+    <div class="donate-hero">
+      <svg class="donate-heart" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <h1 class="donate-title">Support NamiTube</h1>
+      <p class="donate-desc">We believe anime should be free for everyone. No ads. No subscriptions. If you enjoy our service, consider supporting us.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier">
+        <svg class="tier-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        <div class="tier-price">$3</div>
+        <div class="tier-name">Coffee</div>
+        <div class="tier-desc">Buy us a coffee. Basic supporter badge on your profile.</div>
+        <button class="btn btn-primary btn-full">Support</button>
+      </div>
+      <div class="tier">
+        <svg class="tier-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="tier-price">$5</div>
+        <div class="tier-name">Fan</div>
+        <div class="tier-desc">Super fan status. Name in supporters list + special badge.</div>
+        <button class="btn btn-primary btn-full">Support</button>
+      </div>
+      <div class="tier">
+        <svg class="tier-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <div class="tier-price">$10</div>
+        <div class="tier-name">Legend</div>
+        <div class="tier-desc">Anime Legend. Special badge + priority feature requests.</div>
+        <button class="btn btn-primary btn-full">Support</button>
+      </div>
+    </div>
+    <div class="transparency">
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">Where does your money go?</h3>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">Your donations directly support server costs, API maintenance, and development time.</p>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+      <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary);">
+        <span>$450 raised</span>
+        <span>Goal: $1,000/mo</span>
+      </div>
+    </div>
+  </main>
+  <script src="js/main.js"></script>
+</body>
+</html>

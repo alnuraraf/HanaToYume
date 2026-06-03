@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NamiTube - Watch Anime Free</title>
+  <meta name="description" content="Stream thousands of anime episodes in HD. Free, fast, and no ads.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://api.jikan.moe">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    .genre-filters {
+      display: flex;
+      gap: 10px;
+      padding: 0 24px 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .genre-filters::-webkit-scrollbar { display: none; }
+    .continue-section {
+      margin-bottom: 48px;
+      padding: 0 24px;
+    }
+    .continue-card {
+      display: flex;
+      gap: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px solid var(--border);
+      transition: border-color var(--transition-fast);
+      cursor: pointer;
+    }
+    .continue-card:hover {
+      border-color: var(--text-muted);
+    }
+    .continue-thumb {
+      width: 120px;
+      aspect-ratio: 16/9;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .continue-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .continue-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .continue-ep {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <main id="main-content" style="padding-top: var(--header-height);">
+    <div class="hero-carousel" id="heroCarousel">
+      <div class="carousel-nav prev" onclick="Home.prevSlide()" aria-label="Previous slide">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="carousel-nav next" onclick="Home.nextSlide()" aria-label="Next slide">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+
+    <div id="continueSection" style="display: none;">
+      <div class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">Continue Watching</h2>
+          <button class="btn btn-ghost btn-sm" onclick="Storage.resetAll()">Clear All</button>
+        </div>
+        <div class="continue-grid" id="continueGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;"></div>
+      </div>
+    </div>
+
+    <div class="genre-filters" id="genreFilters">
+      <button class="pill active" data-genre="">All</button>
+      <button class="pill" data-genre="1">Action</button>
+      <button class="pill" data-genre="2">Adventure</button>
+      <button class="pill" data-genre="4">Comedy</button>
+      <button class="pill" data-genre="8">Drama</button>
+      <button class="pill" data-genre="10">Fantasy</button>
+      <button class="pill" data-genre="14">Horror</button>
+      <button class="pill" data-genre="18">Mecha</button>
+      <button class="pill" data-genre="22">Romance</button>
+      <button class="pill" data-genre="24">Sci-Fi</button>
+      <button class="pill" data-genre="36">Slice of Life</button>
+      <button class="pill" data-genre="30">Sports</button>
+      <button class="pill" data-genre="37">Supernatural</button>
+    </div>
+
+    <div id="contentSections">
+      <div class="content-section">
+        <div class="section-header reveal">
+          <h2 class="section-title">Top Airing</h2>
+          <a href="search.html?filter=airing" class="section-more">View All &rarr;</a>
+        </div>
+        <div class="scroll-row" id="topAiring">
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header reveal">
+          <h2 class="section-title">Most Popular</h2>
+          <a href="search.html?filter=bypopularity" class="section-more">View All &rarr;</a>
+        </div>
+        <div class="scroll-row" id="mostPopular">
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header reveal">
+          <h2 class="section-title">Top Rated</h2>
+          <a href="search.html?filter=favorite" class="section-more">View All &rarr;</a>
+        </div>
+        <div class="scroll-row" id="topRated">
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header reveal">
+          <h2 class="section-title">Latest Episodes</h2>
+        </div>
+        <div class="scroll-row" id="latestEps">
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header reveal">
+          <h2 class="section-title">Movies</h2>
+        </div>
+        <div class="scroll-row" id="moviesRow">
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <div class="section-header reveal">
+          <h2 class="section-title">Upcoming</h2>
+        </div>
+        <div class="scroll-row" id="upcomingRow">
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+          <div class="skeleton skeleton-card" style="width: 180px; flex-shrink: 0;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const Home = {
+      slides: [],
+      currentSlide: 0,
+      slideInterval: null,
+
+      init() {
+        this.loadHero();
+        this.loadSections();
+        this.loadContinueWatching();
+        this.initGenreFilters();
+        this.initParallax();
+      },
+
+      async loadHero() {
+        try {
+          const data = await JikanAPI.getTopAnime('airing', 1, 5);
+          this.slides = data.data || [];
+          const container = document.getElementById('heroCarousel');
+          this.slides.forEach((anime, i) => {
+            const slide = document.createElement('div');
+            slide.className = `hero-slide ${i === 0 ? 'active' : ''}`;
+            const image = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
+            slide.innerHTML = `
+              <div class="hero-slide-bg" style="background-image: url('${image}')"></div>
+              <div class="hero-slide-overlay"></div>
+              <div class="hero-slide-content">
+                <h2 class="hero-title">${escapeHtml(anime.title_english || anime.title)}</h2>
+                <p class="hero-synopsis">${escapeHtml(anime.synopsis || '')}</p>
+                <div class="hero-genres">
+                  ${(anime.genres || []).slice(0, 3).map(g => `<span class="hero-genre">${escapeHtml(g.name)}</span>`).join('')}
+                </div>
+                <div class="hero-actions">
+                  <a href="watch.html?id=${anime.mal_id}&ep=1&lang=sub" class="btn btn-primary btn-lg">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><polygon points="5 3 19 12 5 21 5 3"/></svg> Watch Now
+                  </a>
+                  <button class="btn btn-outline btn-lg" onclick="Storage.addToWatchlist({mal_id: ${anime.mal_id}, title: '${escapeHtml(anime.title_english || anime.title).replace(/'/g, "\'")}', title_english: '${escapeHtml(anime.title_english || anime.title).replace(/'/g, "\'")}', images: {jpg: {image_url: '${anime.images?.jpg?.image_url || ''}'}}, episodes: ${anime.episodes || 0}}, 'watching')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Add to List
+                  </button>
+                </div>
+              </div>
+            `;
+            container.insertBefore(slide, container.firstChild);
+          });
+
+          const dots = document.getElementById('carouselDots');
+          dots.innerHTML = this.slides.map((_, i) => 
+            `<button class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="Home.goToSlide(${i})" aria-label="Go to slide ${i + 1}"></button>`
+          ).join('');
+
+          this.startAutoPlay();
+          container.addEventListener('mouseenter', () => this.stopAutoPlay());
+          container.addEventListener('mouseleave', () => this.startAutoPlay());
+        } catch (e) {
+          console.error('Hero load failed:', e);
+        }
+      },
+
+      goToSlide(index) {
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots = document.querySelectorAll('.carousel-dot');
+        slides.forEach((s, i) => s.classList.toggle('active', i === index));
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        this.currentSlide = index;
+      },
+
+      nextSlide() {
+        const next = (this.currentSlide + 1) % this.slides.length;
+        this.goToSlide(next);
+      },
+
+      prevSlide() {
+        const prev = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+        this.goToSlide(prev);
+      },
+
+      startAutoPlay() {
+        this.stopAutoPlay();
+        this.slideInterval = setInterval(() => this.nextSlide(), 8000);
+      },
+
+      stopAutoPlay() {
+        if (this.slideInterval) clearInterval(this.slideInterval);
+      },
+
+      async loadSections() {
+        const sections = [
+          { id: 'topAiring', fn: () => JikanAPI.getTopAnime('airing', 1, 15) },
+          { id: 'mostPopular', fn: () => JikanAPI.getTopAnime('bypopularity', 1, 15) },
+          { id: 'topRated', fn: () => JikanAPI.getTopAnime('favorite', 1, 15) },
+          { id: 'latestEps', fn: () => JikanAPI.getSeasonNow(1, 15) },
+          { id: 'moviesRow', fn: () => JikanAPI.getTopAnime('', 1, 25) },
+          { id: 'upcomingRow', fn: () => JikanAPI.getSeasonUpcoming(1, 15) }
+        ];
+
+        for (const section of sections) {
+          try {
+            const data = await section.fn();
+            let animeList = data.data || [];
+            if (section.id === 'moviesRow') {
+              animeList = animeList.filter(a => a.type === 'Movie').slice(0, 10);
+            }
+            const container = document.getElementById(section.id);
+            if (animeList.length) {
+              container.innerHTML = animeList.map(anime => App.createAnimeCardHTML(anime)).join('');
+              container.querySelectorAll('.anime-card').forEach(card => {
+                card.addEventListener('click', () => {
+                  window.location.href = `anime.html?id=${card.dataset.id}`;
+                });
+              });
+            } else {
+              container.innerHTML = '<p style="color: var(--text-secondary); padding: 40px;">No content available</p>';
+            }
+          } catch (e) {
+            console.error(`Failed to load ${section.id}:`, e);
+          }
+        }
+      },
+
+      loadContinueWatching() {
+        const continueWatching = Storage.getContinueWatching();
+        const section = document.getElementById('continueSection');
+        const grid = document.getElementById('continueGrid');
+        if (!continueWatching.length) {
+          section.style.display = 'none';
+          return;
+        }
+        section.style.display = 'block';
+        grid.innerHTML = continueWatching.map(item => `
+          <div class="continue-card" onclick="window.location.href='watch.html?id=${item.malId}&ep=${item.episode}&lang=${item.language}'">
+            <img src="${item.image}" alt="${escapeHtml(item.title)}" class="continue-thumb" loading="lazy">
+            <div class="continue-info">
+              <div class="continue-title">${escapeHtml(item.title)}</div>
+              <div class="continue-ep">Episode ${item.episode} &bull; ${item.language.toUpperCase()}</div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${item.progress}%"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="align-self: center;" onclick="event.stopPropagation(); window.location.href='watch.html?id=${item.malId}&ep=${item.episode}&lang=${item.language}'">
+              <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+          </div>
+        `).join('');
+      },
+
+      initGenreFilters() {
+        document.getElementById('genreFilters').addEventListener('click', async (e) => {
+          if (!e.target.classList.contains('pill')) return;
+          document.querySelectorAll('.genre-filters .pill').forEach(p => p.classList.remove('active'));
+          e.target.classList.add('active');
+          const genreId = e.target.dataset.genre;
+          if (!genreId) {
+            document.getElementById('contentSections').style.display = 'block';
+            return;
+          }
+          App.showToast('Genre filter: ' + e.target.textContent, 'info');
+        });
+      },
+
+      initParallax() {
+        window.addEventListener('scroll', () => {
+          const scrolled = window.pageYOffset;
+          const bg = document.querySelector('.hero-slide.active .hero-slide-bg');
+          if (bg) {
+            bg.style.transform = `scale(1.1) translateY(${scrolled * 0.3}px)`;
+          }
+        });
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => Home.init());
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search - NamiTube</title>
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://api.jikan.moe">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    .search-page-bar { position: sticky; top: var(--header-height); background: var(--bg-primary); z-index: 100; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .search-input-lg { font-size: 20px; padding: 16px 20px; background: var(--bg-card); border-radius: var(--radius-md); }
+    .search-filters { display: flex; gap: 12px; padding: 16px 24px; overflow-x: auto; }
+    .search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 24px; }
+    .results-header { display: flex; justify-content: space-between; align-items: center; padding: 0 24px 16px; }
+    .sort-select { width: auto; min-width: 140px; }
+  </style>
+</head>
+<body>
+  <main id="main-content" style="padding-top: var(--header-height);">
+    <div class="search-page-bar">
+      <input type="text" class="search-input-lg" id="searchInput" placeholder="Search for anime..." autocomplete="off">
+    </div>
+    <div class="search-filters">
+      <select class="pill" style="border: none;" id="typeFilter"><option value="">All Types</option><option value="tv">TV</option><option value="movie">Movie</option><option value="ova">OVA</option></select>
+      <select class="pill" style="border: none;" id="statusFilter"><option value="">All Status</option><option value="airing">Airing</option><option value="complete">Complete</option><option value="upcoming">Upcoming</option></select>
+      <select class="pill" style="border: none;" id="ratingFilter"><option value="">All Ratings</option><option value="g">G</option><option value="pg">PG</option><option value="pg13">PG-13</option><option value="r">R</option></select>
+      <button class="pill" onclick="SearchPage.reset()">Reset</button>
+    </div>
+    <div class="results-header">
+      <span style="color: var(--text-secondary); font-size: 14px;" id="resultsCount">0 results</span>
+      <select class="sort-select pill" id="sortSelect" style="border: none;">
+        <option value="relevance">Relevance</option>
+        <option value="score">Score</option>
+        <option value="popularity">Popularity</option>
+      </select>
+    </div>
+    <div class="search-results-grid" id="searchResults">
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+    </div>
+  </main>
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const SearchPage = {
+      async init() {
+        const params = new URLSearchParams(window.location.search);
+        const query = params.get('q') || '';
+        if (query) {
+          document.getElementById('searchInput').value = query;
+          this.performSearch(query);
+        }
+        document.getElementById('searchInput').addEventListener('input', debounce((e) => {
+          this.performSearch(e.target.value);
+        }, 500));
+      },
+      async performSearch(query) {
+        if (!query.trim()) return;
+        try {
+          const data = await JikanAPI.searchAnime(query, 1, 25);
+          const results = document.getElementById('searchResults');
+          document.getElementById('resultsCount').textContent = `${data.pagination?.items?.total || data.data?.length || 0} results`;
+          if (!data.data?.length) {
+            results.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">No anime found</p>';
+            return;
+          }
+          results.innerHTML = data.data.map(anime => App.createAnimeCardHTML(anime)).join('');
+          results.querySelectorAll('.anime-card').forEach(card => {
+            card.addEventListener('click', () => {
+              window.location.href = `anime.html?id=${card.dataset.id}`;
+            });
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      },
+      reset() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('typeFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('ratingFilter').value = '';
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementById('resultsCount').textContent = '0 results';
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => SearchPage.init());
+  </script>
+</body>
+</html>
