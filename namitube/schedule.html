@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Schedule — NamiTube</title>
+<meta name="description" content="Weekly anime broadcast schedule. See what's airing today, tomorrow, and throughout the week."/>
+<link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/variables.css"/>
+<link rel="stylesheet" href="css/animations.css"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/schedule.css"/>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div id="header-placeholder"></div>
+
+<main id="main" role="main">
+  <div class="container" style="padding-top:32px;">
+    <h1 style="font-family:var(--font-head);font-size:32px;margin-bottom:8px;">Weekly Schedule</h1>
+    <p class="text-secondary" style="margin-bottom:24px;">Track when your favourite anime air each week.</p>
+
+    <div class="schedule-banner" id="scheduleBanner"></div>
+
+    <div class="day-tabs" id="dayTabs" role="tablist"></div>
+    <div class="schedule-list" id="scheduleList"></div>
+  </div>
+</main>
+
+<div id="footer-placeholder"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script defer src="js/utils.js"></script>
+<script defer src="js/api.js"></script>
+<script defer src="js/storage.js"></script>
+<script defer src="js/components.js"></script>
+<script defer src="js/schedule.js"></script>
+</body>
+</html>

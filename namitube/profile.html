@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Profile — NamiTube</title>
+<meta name="description" content="Manage your NamiTube profile, preferences, and view your anime stats."/>
+<link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/variables.css"/>
+<link rel="stylesheet" href="css/animations.css"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/profile.css"/>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div id="header-placeholder"></div>
+
+<main id="main" role="main">
+  <div class="container" style="padding-top:32px;max-width:920px;">
+    <div class="profile-header">
+      <div>
+        <div class="profile-avatar" id="profileAvatar"></div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;"/>
+      </div>
+      <div>
+        <span class="profile-name" id="profileName" contenteditable="true" spellcheck="false" aria-label="Edit display name"></span>
+        <div class="profile-join" id="profileJoin"></div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+    </div>
+
+    <section class="profile-section" id="settings">
+      <h2><i data-lucide="settings"></i>Preferences</h2>
+      <div class="pref-row">
+        <div>
+          <div class="pref-label">Default Language</div>
+          <div class="pref-desc">Choose between subtitled or dubbed by default.</div>
+        </div>
+        <div class="radio-grp" id="langRadio"></div>
+      </div>
+      <div class="pref-row">
+        <div>
+          <div class="pref-label">Autoplay Next Episode</div>
+          <div class="pref-desc">Automatically play the next episode when current one ends.</div>
+        </div>
+        <div class="toggle" id="autoplayToggle" role="switch"></div>
+      </div>
+      <div class="pref-row">
+        <div>
+          <div class="pref-label">Mature Content Warning</div>
+          <div class="pref-desc">Show a confirmation before playing mature anime.</div>
+        </div>
+        <div class="toggle" id="matureToggle" role="switch"></div>
+      </div>
+      <div class="pref-row">
+        <div>
+          <div class="pref-label">Theme Accent Colour</div>
+          <div class="pref-desc">Customise the highlight colour across the site.</div>
+        </div>
+        <div class="color-swatches" id="colorSwatches"></div>
+      </div>
+    </section>
+
+    <section class="profile-section">
+      <h2><i data-lucide="bar-chart-3"></i>Anime Stats</h2>
+      <div id="animeStats"></div>
+    </section>
+
+    <section class="profile-section danger-zone">
+      <h2><i data-lucide="alert-triangle"></i>Danger Zone</h2>
+      <div class="pref-row">
+        <div>
+          <div class="pref-label">Clear All Data</div>
+          <div class="pref-desc">Permanently delete your profile, watchlist, favourites, and history.</div>
+        </div>
+        <button class="btn btn-secondary" id="clearDataBtn" style="border-color:var(--color-red);color:var(--color-red);">
+          <i data-lucide="trash-2"></i>Clear All
+        </button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="footer-placeholder"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script defer src="js/utils.js"></script>
+<script defer src="js/api.js"></script>
+<script defer src="js/storage.js"></script>
+<script defer src="js/components.js"></script>
+<script defer src="js/profile.js"></script>
+</body>
+</html>

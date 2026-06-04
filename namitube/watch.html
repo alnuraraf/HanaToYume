@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Watch — NamiTube</title>
+<meta name="description" content="Watch anime online free on NamiTube."/>
+<link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/variables.css"/>
+<link rel="stylesheet" href="css/animations.css"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/watch.css"/>
+</head>
+<body>
+<div class="scroll-progress" id="scrollProgress"></div>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div id="header-placeholder"></div>
+
+<main id="main" role="main">
+  <div class="container watch-wrap">
+    <div class="breadcrumb" id="breadcrumb">
+      <a href="home.html">Home</a>
+      <i data-lucide="chevron-right"></i>
+      <a href="#" id="bcAnime">Loading...</a>
+      <i data-lucide="chevron-right"></i>
+      <span class="current" id="bcEp">Episode</span>
+    </div>
+
+    <div class="player-wrap" id="playerWrap">
+      <div class="flex-center" style="position:absolute;inset:0;color:var(--color-text-muted);">Loading player...</div>
+    </div>
+
+    <div class="player-controls">
+      <div class="player-controls-grp">
+        <span class="text-muted" style="font-size:12px;">Language:</span>
+        <div class="tab-group" style="background:var(--color-bg-hover);">
+          <button class="tab-btn" data-lang-btn="sub" style="padding:6px 14px;font-size:12px;">Sub</button>
+          <button class="tab-btn" data-lang-btn="dub" style="padding:6px 14px;font-size:12px;">Dub</button>
+        </div>
+        <span class="text-muted" style="font-size:12px;margin-left:8px;">Server:</span>
+        <div class="tab-group" style="background:var(--color-bg-hover);">
+          <button class="tab-btn" data-srv-btn="primary" style="padding:6px 14px;font-size:12px;">Server 1</button>
+          <button class="tab-btn" data-srv-btn="backup" style="padding:6px 14px;font-size:12px;">Server 2</button>
+        </div>
+      </div>
+      <div class="player-controls-grp">
+        <button class="btn btn-secondary btn-sm" id="prevEp"><i data-lucide="chevron-left"></i>Previous</button>
+        <button class="btn btn-secondary btn-sm" id="nextEp">Next<i data-lucide="chevron-right"></i></button>
+      </div>
+    </div>
+
+    <div class="watch-grid">
+      <section>
+        <div class="episode-info" id="episodeInfo">
+          <div class="skel" style="height:80px;border-radius:var(--radius-md);"></div>
+        </div>
+
+        <div class="section" style="margin:18px 0;">
+          <div class="section-head"><h2 class="section-title">All Episodes</h2></div>
+          <div id="epStripWrap"></div>
+        </div>
+
+        <div class="discord-cta">
+          <h3>Join the Discussion</h3>
+          <p>Talk about this episode with fellow fans on our Discord community.</p>
+          <a href="#" class="btn btn-primary"><i data-lucide="message-circle"></i>Join Discord</a>
+        </div>
+      </section>
+
+      <aside role="complementary">
+        <div class="side-card" id="compactInfo">
+          <h3>Anime</h3>
+          <div class="skel" style="height:120px;border-radius:var(--radius-md);"></div>
+        </div>
+        <div class="side-card" id="nextEpCard" style="display:none;">
+          <h3>Next Episode</h3>
+          <div id="nextEpBody"></div>
+        </div>
+        <div class="side-card">
+          <h3>Recommendations</h3>
+          <div id="recsList" style="display:flex;flex-direction:column;gap:10px;">
+            <div class="skel" style="height:60px;"></div>
+            <div class="skel" style="height:60px;"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div id="footer-placeholder"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script defer src="js/utils.js"></script>
+<script defer src="js/api.js"></script>
+<script defer src="js/storage.js"></script>
+<script defer src="js/components.js"></script>
+<script defer src="js/player.js"></script>
+<script defer>
+let animeData = null;
+let episodes = [];
+let currentEp = 1;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  Components.mount();
+
+  const id = Utils.getParam('id');
+  currentEp = Number(Utils.getParam('ep') || 1);
+  const lang = Utils.getParam('lang') || Storage.get().preferences.defaultLang || 'sub';
+
+  if (!id) { document.getElementById('playerWrap').innerHTML = '<div class="flex-center" style="position:absolute;inset:0;color:var(--color-text-muted);">Missing anime ID.</div>'; return; }
+
+  Player.init({ malId: id, episode: currentEp, lang });
+
+  // Lang/server buttons
+  document.querySelectorAll('[data-lang-btn]').forEach(b => b.onclick = () => Player.setLang(b.dataset.langBtn));
+  document.querySelectorAll('[data-srv-btn]').forEach(b => b.onclick = () => Player.setServer(b.dataset.srvBtn));
+  document.getElementById('prevEp').onclick = () => navEp(-1);
+  document.getElementById('nextEp').onclick = () => navEp(1);
+
+  // Scroll progress
+  window.addEventListener('scroll', Utils.throttle(() => {
+    const sp = document.getElementById('scrollProgress');
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    sp.style.width = (window.scrollY / h * 100) + '%';
+  }, 60));
+
+  document.addEventListener('episode-changed', (e) => {
+    currentEp = Number(e.detail.ep);
+    renderEpisodeInfo();
+    saveProgress();
+    highlightStrip();
+  });
+
+  try {
+    const [animeRes, alData, epRes] = await Promise.all([
+      API.getAnime(id),
+      API.aniListByMal(id).catch(() => null),
+      API.getEpisodes(id).catch(() => ({ data: [] }))
+    ]);
+    animeData = animeRes.data;
+    episodes = epRes.data || [];
+    if (!episodes.length && animeData.episodes) {
+      episodes = Array.from({ length: animeData.episodes }, (_, i) => ({ mal_id: i+1, title: `Episode ${i+1}` }));
+    }
+    if (alData?.Media?.id) Player.setAnilistId(alData.Media.id);
+
+    document.title = `${animeData.title} — Episode ${currentEp} — NamiTube`;
+    renderBreadcrumb();
+    renderEpisodeInfo();
+    renderEpisodeStrip();
+    renderCompactInfo();
+    renderNextEpisode(alData?.Media?.nextAiringEpisode);
+    loadRecs(id);
+    saveProgress();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('episodeInfo').innerHTML = '<p class="text-muted">Failed to load.</p>';
+  }
+});
+
+function navEp(delta) {
+  const next = currentEp + delta;
+  if (next < 1 || (animeData?.episodes && next > animeData.episodes)) return;
+  Player.setEpisode(next);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderBreadcrumb() {
+  document.getElementById('bcAnime').textContent = animeData.title;
+  document.getElementById('bcAnime').href = `anime.html?id=${animeData.mal_id}`;
+  document.getElementById('bcEp').textContent = `Episode ${currentEp}`;
+}
+
+function renderEpisodeInfo() {
+  const ep = episodes.find(e => Number(e.mal_id || e.number) === currentEp);
+  const epTitle = ep?.title || `Episode ${currentEp}`;
+  const epSyn = ep?.synopsis || '';
+  document.getElementById('episodeInfo').innerHTML = `
+    <h2>Episode ${currentEp} · ${Utils.escapeHtml(epTitle)}</h2>
+    ${epSyn ? `<p>${Utils.escapeHtml(epSyn)}</p>` : `<p class="text-muted">No synopsis available.</p>`}
+  `;
+  document.title = `${animeData.title} — Episode ${currentEp} — NamiTube`;
+  document.getElementById('bcEp').textContent = `Episode ${currentEp}`;
+}
+
+function renderEpisodeStrip() {
+  const wrap = document.getElementById('epStripWrap');
+  wrap.innerHTML = '';
+  const strip = Components.EpisodeStrip(episodes, currentEp, (ep) => {
+    Player.setEpisode(ep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  wrap.appendChild(strip);
+  highlightStrip();
+}
+
+function highlightStrip() {
+  document.querySelectorAll('.ep-strip-item').forEach((el, i) => {
+    const epNum = episodes[i]?.mal_id || episodes[i]?.number;
+    el.classList.toggle('current', Number(epNum) === Number(currentEp));
+  });
+}
+
+function renderCompactInfo() {
+  const a = animeData;
+  document.getElementById('compactInfo').innerHTML = `
+    <h3>Now Playing</h3>
+    <a href="anime.html?id=${a.mal_id}" class="compact-anime">
+      <img src="${a.images?.jpg?.large_image_url||''}" alt=""/>
+      <div>
+        <div class="ca-title">${Utils.escapeHtml(a.title)}</div>
+        <div class="ca-meta">
+          ${a.score ? `<span style="color:var(--color-gold);">⭐ ${a.score}</span>` : ''}
+          ${a.type ? `<span>· ${a.type}</span>` : ''}
+        </div>
+        <div class="mt-2" style="display:flex;flex-wrap:wrap;gap:4px;">
+          ${(a.genres||[]).slice(0,3).map(g => `<span class="tag tag-static" style="font-size:10px;">${Utils.escapeHtml(g.name)}</span>`).join('')}
+        </div>
+      </div>
+    </a>`;
+}
+
+function renderNextEpisode(next) {
+  if (!next) return;
+  const card = document.getElementById('nextEpCard');
+  card.style.display = 'block';
+  document.getElementById('nextEpBody').innerHTML = `
+    <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;">Episode ${next.episode} airs in:</p>
+    ${Components.CountdownTimer(next.airingAt * 1000)}
+  `;
+}
+
+async function loadRecs(id) {
+  try {
+    const r = await API.getRecommendations(id);
+    const recs = (r.data || []).slice(0, 4).map(x => x.entry);
+    const list = document.getElementById('recsList');
+    list.innerHTML = recs.map(a => `
+      <a href="anime.html?id=${a.mal_id}" class="compact-anime">
+        <img src="${a.images?.jpg?.image_url||''}" alt="" style="width:48px;height:64px;"/>
+        <div>
+          <div class="ca-title" style="font-size:13px;">${Utils.escapeHtml(a.title)}</div>
+        </div>
+      </a>`).join('') || '<p class="text-muted">No recommendations.</p>';
+  } catch (e) {
+    document.getElementById('recsList').innerHTML = '<p class="text-muted">Failed to load.</p>';
+  }
+}
+
+function saveProgress() {
+  if (!animeData) return;
+  Storage.addToHistory({
+    malId: animeData.mal_id,
+    title: animeData.title,
+    posterUrl: animeData.images?.jpg?.large_image_url || '',
+    episode: currentEp,
+    totalEpisodes: animeData.episodes || 0
+  });
+}
+</script>
+</body>
+</html>

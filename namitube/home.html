@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Home — NamiTube</title>
+<meta name="description" content="Browse trending, seasonal, and top-rated anime. Discover what's airing this season on NamiTube."/>
+<meta property="og:title" content="Home — NamiTube"/>
+<meta property="og:description" content="Browse trending, seasonal, and top-rated anime."/>
+<link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/variables.css"/>
+<link rel="stylesheet" href="css/animations.css"/>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/home.css"/>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div id="header-placeholder"></div>
+
+<main id="main" role="main">
+  <div class="container">
+    <section class="spotlight" id="spotlight" aria-label="Featured spotlight" style="margin-top:24px;">
+      <div class="skel" style="height:100%;border-radius:var(--radius-lg);"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">Trending Anime</h2>
+      </div>
+      <div class="anime-row" id="trendingRow"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">New Episodes Today</h2>
+      </div>
+      <div class="anime-row" id="newToday"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">This Season</h2>
+        <a href="schedule.html" class="section-link">Full schedule <i data-lucide="chevron-right" style="width:14px;height:14px;"></i></a>
+      </div>
+      <div class="anime-grid" id="seasonGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">Top Rated All Time</h2>
+      </div>
+      <div class="anime-row" id="topRated"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">Upcoming</h2>
+      </div>
+      <div class="anime-grid" id="upcomingGrid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">Browse by Genre</h2>
+      </div>
+      <div class="genre-tabs" id="genreTabs"></div>
+      <div class="anime-grid mt-4" id="genreGrid" style="margin-top:20px;"></div>
+    </section>
+  </div>
+</main>
+
+<div id="footer-placeholder"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script defer src="js/utils.js"></script>
+<script defer src="js/api.js"></script>
+<script defer src="js/storage.js"></script>
+<script defer src="js/components.js"></script>
+<script defer>
+const GENRES = [
+  { id: 1, name: 'Action' },
+  { id: 22, name: 'Romance' },
+  { id: 62, name: 'Isekai' },
+  { id: 27, name: 'Shounen' },
+  { id: 42, name: 'Seinen' },
+  { id: 14, name: 'Horror' },
+  { id: 10, name: 'Fantasy' },
+  { id: 4, name: 'Comedy' }
+];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  Components.mount();
+  loadSpotlight();
+  loadRow('trendingRow', () => API.getTopAiring(1).then(r => r.data.slice(0,8)));
+  loadRow('newToday', () => API.getSchedule(Utils.getCurrentDay()).then(r => (r.data || []).slice(0,8)));
+  loadGrid('seasonGrid', () => API.getSeasonNow().then(r => r.data.slice(0,12)), 12);
+  loadRow('topRated', () => API.getTopPopularity().then(r => r.data.slice(0,10)));
+  loadGrid('upcomingGrid', () => API.getSeasonUpcoming().then(r => r.data.slice(0,8)), 8);
+  loadGenres();
+});
+
+async function loadSpotlight() {
+  const wrap = document.getElementById('spotlight');
+  try {
+    const al = await API.aniListTrending();
+    const items = (al?.Page?.media || []).filter(m => m.bannerImage).slice(0, 5);
+    if (!items.length) throw new Error('no items');
+    wrap.innerHTML = `
+      ${items.map((m,i) => `
+        <div class="spotlight-slide ${i===0?'active':''}" data-i="${i}"
+             style="background-image:url('${m.bannerImage}')">
+          <div class="spotlight-content">
+            <h1 class="spotlight-title">${Utils.escapeHtml(m.title.english || m.title.romaji)}</h1>
+            <div class="spotlight-meta">
+              ${m.averageScore ? `<span class="meta-pill"><i data-lucide="star" style="width:12px;height:12px;color:var(--color-gold);"></i>${(m.averageScore/10).toFixed(1)}</span>` : ''}
+              ${m.episodes ? `<span class="meta-pill"><i data-lucide="tv" style="width:12px;height:12px;"></i>${m.episodes} eps</span>` : ''}
+            </div>
+            <p class="spotlight-desc">${Utils.escapeHtml(Utils.truncate(Utils.stripHtml(m.description||''), 220))}</p>
+            <div class="spotlight-actions">
+              <a href="watch.html?id=${m.idMal}&ep=1&lang=sub" class="btn btn-primary"><i data-lucide="play"></i>Watch Now</a>
+              <button class="btn btn-secondary" data-add-watchlist="${m.idMal}" data-title="${Utils.escapeHtml(m.title.english||m.title.romaji)}" data-poster="${m.coverImage?.extraLarge||''}">
+                <i data-lucide="bookmark"></i>Add to Watchlist
+              </button>
+            </div>
+          </div>
+        </div>`).join('')}
+      <div class="spotlight-controls">
+        <button id="spPrev" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
+        <button id="spNext" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+      </div>
+      <div class="spotlight-dots">
+        ${items.map((_,i)=>`<button class="${i===0?'active':''}" data-dot="${i}" aria-label="Go to ${i+1}"></button>`).join('')}
+      </div>`;
+    Utils.initIcons();
+
+    let cur = 0;
+    const slides = wrap.querySelectorAll('.spotlight-slide');
+    const dots = wrap.querySelectorAll('.spotlight-dots button');
+    const goTo = (i) => {
+      slides[cur].classList.remove('active');
+      dots[cur].classList.remove('active');
+      cur = (i + slides.length) % slides.length;
+      slides[cur].classList.add('active');
+      dots[cur].classList.add('active');
+    };
+    let timer = setInterval(() => goTo(cur + 1), 10000);
+    const restart = () => { clearInterval(timer); timer = setInterval(()=>goTo(cur+1), 10000); };
+    document.getElementById('spPrev').onclick = () => { goTo(cur-1); restart(); };
+    document.getElementById('spNext').onclick = () => { goTo(cur+1); restart(); };
+    dots.forEach(d => d.onclick = () => { goTo(Number(d.dataset.dot)); restart(); });
+
+    // watchlist add
+    wrap.querySelectorAll('[data-add-watchlist]').forEach(btn => {
+      btn.onclick = () => {
+        const malId = Number(btn.dataset.addWatchlist);
+        Storage.addToWatchlist({ malId, title: btn.dataset.title, posterUrl: btn.dataset.poster, score: 0 });
+        Components.Toast('Added to watchlist', 'success');
+      };
+    });
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--color-text-muted);">Failed to load spotlight.</div>';
+  }
+}
+
+async function loadRow(id, fetcher) {
+  const el = document.getElementById(id);
+  el.innerHTML = Utils.skeletonGrid(8);
+  try {
+    const items = await fetcher();
+    el.classList.add('stagger-in');
+    el.innerHTML = items.map(a => Components.AnimeCard(a)).join('') || '<p class="text-muted">Nothing here.</p>';
+    Utils.initIcons();
+  } catch (e) {
+    el.innerHTML = '<p class="text-muted">Failed to load.</p>';
+  }
+}
+
+async function loadGrid(id, fetcher, n = 12) {
+  const el = document.getElementById(id);
+  el.innerHTML = Utils.skeletonGrid(n);
+  try {
+    const items = await fetcher();
+    el.classList.add('stagger-in');
+    el.innerHTML = items.map(a => Components.AnimeCard(a)).join('') || '<p class="text-muted">Nothing here.</p>';
+    Utils.initIcons();
+  } catch (e) {
+    el.innerHTML = '<p class="text-muted">Failed to load.</p>';
+  }
+}
+
+function loadGenres() {
+  const tabs = document.getElementById('genreTabs');
+  const grid = document.getElementById('genreGrid');
+  tabs.innerHTML = GENRES.map((g, i) => `<button class="genre-tab ${i===0?'active':''}" data-gid="${g.id}">${g.name}</button>`).join('');
+  const loadGenre = async (id) => {
+    grid.innerHTML = Utils.skeletonGrid(12);
+    try {
+      const r = await API.searchAnime('', { genres: id, limit: 12, orderBy: 'score', sort: 'desc' });
+      grid.innerHTML = (r.data || []).map(a => Components.AnimeCard(a)).join('') || '<p class="text-muted">No results.</p>';
+      Utils.initIcons();
+    } catch (e) {
+      grid.innerHTML = '<p class="text-muted">Failed to load.</p>';
+    }
+  };
+  tabs.querySelectorAll('.genre-tab').forEach(b => {
+    b.onclick = () => {
+      tabs.querySelectorAll('.genre-tab').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      loadGenre(b.dataset.gid);
+    };
+  });
+  loadGenre(GENRES[0].id);
+}
+</script>
+</body>
+</html>
