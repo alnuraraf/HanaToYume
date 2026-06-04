@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Watch — NamiTube</title>
+  <meta name="description" content="Stream anime episodes in HD with sub and dub options on NamiTube." />
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/watch.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <meta property="og:type" content="video.episode" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div id="header-slot"></div>
+
+  <main id="main" role="main">
+    <div class="container watch-wrap">
+      <div class="watch-breadcrumb" id="breadcrumb"></div>
+
+      <div id="playerHost" class="player-host"></div>
+
+      <div class="watch-controls">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button class="active" data-lang="sub" id="subBtn">Sub</button>
+          <button data-lang="dub" id="dubBtn">Dub</button>
+        </div>
+        <div class="server-toggle" role="group" aria-label="Server">
+          <button class="active" data-server="primary" id="server1">
+            <span class="dot"></span>
+            <span>Server 1</span>
+          </button>
+          <button data-server="backup" id="server2">
+            <span class="dot"></span>
+            <span>Server 2</span>
+          </button>
+        </div>
+        <div class="ep-nav">
+          <button class="btn btn-secondary btn-sm" id="prevEp">← Prev</button>
+          <button class="btn btn-secondary btn-sm" id="nextEp">Next →</button>
+        </div>
+      </div>
+
+      <div class="watch-layout">
+        <div>
+          <div class="ep-info">
+            <span class="ep-num" id="epNum">Episode —</span>
+            <h2 id="epTitle">Loading…</h2>
+            <p id="epDesc">Loading episode information…</p>
+          </div>
+
+          <div class="ep-strip-wrap">
+            <div class="ep-strip-head">
+              <h3>All Episodes</h3>
+              <span class="ep-count" id="stripCount">—</span>
+            </div>
+            <div class="ep-strip" id="epStrip" role="list"></div>
+          </div>
+
+          <div class="discord-cta">
+            <div class="icon-wrap" id="discordIcon"></div>
+            <h3>Join the Discussion</h3>
+            <p>Chat with thousands of anime fans about this show and discover your next favourite on our Discord server.</p>
+            <a href="#" class="btn btn-primary">Join Discord</a>
+          </div>
+        </div>
+
+        <aside class="watch-side" role="complementary" aria-label="Anime info">
+          <a class="anime-compact" id="animeCompact">
+            <img id="sidePoster" alt="" />
+            <div class="info">
+              <h4 id="sideTitle">—</h4>
+              <div class="meta">
+                <span class="score" id="sideScore">—</span>
+                <span id="sideType">—</span>
+              </div>
+            </div>
+          </a>
+          <div class="next-card">
+            <h4 id="nextCardTitle"></h4>
+            <div class="broadcast" id="nextCardBody">—</div>
+          </div>
+          <div>
+            <h3 style="font-size:var(--fs-base);font-weight:600;margin-bottom:var(--space-3)">You Might Like</h3>
+            <div class="rec-grid" id="recGrid"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-slot"></div>
+
+  <script src="js/utils.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/storage.js" defer></script>
+  <script src="js/components.js" defer></script>
+  <script src="js/player.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const profile = NT.storage.getProfile();
+      if (profile.preferences.accentColor) NT.utils.applyAccentColor(profile.preferences.accentColor);
+      NT.components.injectChrome();
+
+      document.getElementById('discordIcon').innerHTML = NT.components.Icons.discord;
+      document.getElementById('nextCardTitle').innerHTML = NT.components.Icons.calendar + ' Next Episode';
+
+      const params = new URLSearchParams(location.search);
+      const malId = parseInt(params.get('id'), 10);
+      let ep = parseInt(params.get('ep'), 10) || 1;
+      let lang = params.get('lang') || profile.preferences.defaultLang || 'sub';
+      let server = NT.storage.getServerPref();
+
+      if (!malId) {
+        document.getElementById('playerHost').innerHTML = '<p style="padding:var(--space-12);text-align:center">No anime specified. <a href="home.html" style="color:var(--color-accent)">Browse anime</a></p>';
+        return;
+      }
+
+      // Apply lang highlight
+      setLang(lang);
+      setServer(server);
+
+      // Load anime details
+      let anime = null;
+      let episodes = [];
+      try {
+        const [animeRes, episodesRes, recsRes] = await Promise.all([
+          NT.api.animeById(malId),
+          NT.api.episodes(malId, 1).catch(() => ({ data: [] })),
+          NT.api.recommendations(malId).catch(() => ({ data: [] }))
+        ]);
+        anime = animeRes.data;
+        episodes = episodesRes.data || [];
+        if (episodes.length === 0 && anime.episodes) {
+          episodes = Array.from({ length: anime.episodes }, (_, i) => ({
+            mal_id: i + 1, episode: i + 1, title: null
+          }));
+        }
+
+        document.title = `Episode ${ep} — ${anime.title} — NamiTube`;
+
+        // Breadcrumb
+        const bc = document.getElementById('breadcrumb');
+        bc.innerHTML = `
+          <a href="home.html">Home</a>
+          <span class="sep">/</span>
+          <a href="anime.html?id=${malId}">${anime.title}</a>
+          <span class="sep">/</span>
+          <span class="current">Episode ${ep}</span>
+        `;
+
+        // Sidebar compact
+        document.getElementById('sidePoster').src = anime.images?.jpg?.large_image_url || '';
+        document.getElementById('sideTitle').textContent = anime.title;
+        document.getElementById('sideScore').textContent = anime.score ? `★ ${NT.utils.Formatters.score(anime.score)}` : '—';
+        document.getElementById('sideType').textContent = anime.type || '';
+
+        // Recommendations
+        const recs = (recsRes.data || []).map(r => r.entry).filter(Boolean).slice(0, 4);
+        const recGrid = document.getElementById('recGrid');
+        recs.forEach((a, i) => {
+          const c = NT.components.AnimeCard(a, { size: 'md' });
+          c.style.animation = `fadeUp 500ms ${i * 50}ms ease both`;
+          recGrid.appendChild(c);
+        });
+
+        // Next card body
+        const nextBody = document.getElementById('nextCardBody');
+        if (anime.status === 'Finished Airing' || anime.status === 'Finished airing') {
+          nextBody.innerHTML = '<strong>Completed</strong><br/>All episodes available';
+        } else if (anime.broadcast?.day && anime.broadcast?.time) {
+          nextBody.innerHTML = `<strong>${anime.broadcast.day} at ${anime.broadcast.time}</strong><br/>New episode this week`;
+        } else {
+          nextBody.innerHTML = '<strong>Airing</strong><br/>Check back for updates';
+        }
+
+        // Save to history
+        NT.storage.addToHistory({
+          malId,
+          title: anime.title,
+          posterUrl: anime.images?.jpg?.large_image_url,
+          episode: ep,
+          totalEpisodes: anime.episodes || episodes.length || 0,
+          timestamp: Date.now()
+        });
+        NT.storage.markEpisodeWatched(malId, ep);
+
+        renderEpisodeInfo(ep);
+        renderEpisodeStrip(ep);
+        renderPlayer();
+
+      } catch (e) {
+        console.error('Watch page error', e);
+        document.getElementById('playerHost').innerHTML = `<div class="player-error">${NT.components.Icons.x}<p>Failed to load anime data.</p></div>`;
+      }
+
+      function renderPlayer() {
+        const host = document.getElementById('playerHost');
+        host.innerHTML = '';
+        const state = NT.player.render(host, { malId, ep, lang, server });
+
+        // Hide error if loaded
+        const iframe = host.querySelector('iframe');
+        iframe.addEventListener('load', () => {
+          // iframe loaded; nothing to do
+        });
+        // If user wants to switch
+        document.getElementById('server1').onclick = () => switchServer('primary');
+        document.getElementById('server2').onclick = () => switchServer('backup');
+      }
+
+      function switchServer(s) {
+        server = s;
+        NT.storage.setServerPref(s);
+        setServer(s);
+        renderPlayer();
+        NT.components.Toast(`Switched to ${s === 'primary' ? 'Server 1' : 'Server 2'}`, 'info', 1500);
+      }
+
+      function setLang(l) {
+        lang = l;
+        document.getElementById('subBtn').classList.toggle('active', l === 'sub');
+        document.getElementById('dubBtn').classList.toggle('active', l === 'dub');
+        updateUrl();
+      }
+      function setServer(s) {
+        server = s;
+        document.getElementById('server1').classList.toggle('active', s === 'primary');
+        document.getElementById('server2').classList.toggle('active', s === 'backup');
+      }
+
+      function updateUrl() {
+        const url = new URL(location.href);
+        url.searchParams.set('ep', ep);
+        url.searchParams.set('lang', lang);
+        history.pushState(null, '', url.toString());
+      }
+
+      function renderEpisodeInfo(num) {
+        const epData = episodes.find(e => (e.mal_id || e.episode) === num);
+        document.getElementById('epNum').textContent = `Episode ${num}${anime.episodes ? ' of ' + anime.episodes : ''}`;
+        document.getElementById('epTitle').textContent = epData?.title || `Episode ${num}`;
+        document.getElementById('epDesc').textContent = epData?.title && epData.title !== `Episode ${num}`
+          ? `Aired ${epData.aired ? NT.utils.Formatters.date(epData.aired) : 'unknown'}. ${anime.synopsis ? anime.synopsis.slice(0, 200) + '…' : ''}`
+          : (anime.synopsis ? anime.synopsis.slice(0, 240) + '…' : 'No description available for this episode.');
+      }
+
+      function renderEpisodeStrip(currentNum) {
+        const strip = document.getElementById('epStrip');
+        strip.innerHTML = '';
+        document.getElementById('stripCount').textContent = `${episodes.length} total`;
+
+        const watched = NT.storage.getWatchedEpisodes(malId);
+
+        // Virtual render for > 100: window around current
+        let visible = episodes;
+        if (episodes.length > 100) {
+          const idx = episodes.findIndex(e => (e.mal_id || e.episode) === currentNum);
+          const start = Math.max(0, idx - 20);
+          const end = Math.min(episodes.length, start + 60);
+          visible = episodes.slice(start, end);
+        }
+
+        visible.forEach(epObj => {
+          const num = epObj.mal_id || epObj.episode;
+          const isCurrent = num === currentNum;
+          const isWatched = watched.includes(num);
+          const thumb = document.createElement('div');
+          thumb.className = `ep-thumb ${isCurrent ? 'active' : ''} ${isWatched ? 'watched' : ''}`;
+          thumb.setAttribute('role', 'listitem');
+          thumb.setAttribute('tabindex', '0');
+          thumb.innerHTML = `
+            <span class="ep-num">EP ${num}</span>
+            <div class="ep-bar"></div>
+          `;
+          thumb.addEventListener('click', () => loadEpisode(num));
+          thumb.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadEpisode(num); });
+          strip.appendChild(thumb);
+        });
+      }
+
+      function loadEpisode(num) {
+        ep = num;
+        updateUrl();
+        renderEpisodeInfo(num);
+        renderEpisodeStrip(num);
+        renderPlayer();
+        // Update history
+        if (anime) {
+          NT.storage.addToHistory({
+            malId,
+            title: anime.title,
+            posterUrl: anime.images?.jpg?.large_image_url,
+            episode: num,
+            totalEpisodes: anime.episodes || episodes.length || 0,
+            timestamp: Date.now()
+          });
+          NT.storage.markEpisodeWatched(malId, num);
+        }
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.title = `Episode ${num} — ${anime?.title || ''} — NamiTube`;
+      }
+
+      // Language toggle
+      document.getElementById('subBtn').addEventListener('click', () => {
+        setLang('sub');
+        renderPlayer();
+      });
+      document.getElementById('dubBtn').addEventListener('click', () => {
+        setLang('dub');
+        renderPlayer();
+      });
+
+      // Episode nav
+      document.getElementById('prevEp').addEventListener('click', () => {
+        if (ep > 1) loadEpisode(ep - 1);
+      });
+      document.getElementById('nextEp').addEventListener('click', () => {
+        const max = anime?.episodes || episodes.length || 9999;
+        if (ep < max) loadEpisode(ep + 1);
+      });
+
+      // Handle back/forward
+      window.addEventListener('popstate', () => {
+        const newParams = new URLSearchParams(location.search);
+        const newEp = parseInt(newParams.get('ep'), 10) || 1;
+        const newLang = newParams.get('lang') || 'sub';
+        ep = newEp;
+        lang = newLang;
+        setLang(lang);
+        renderEpisodeInfo(ep);
+        renderEpisodeStrip(ep);
+        renderPlayer();
+      });
+
+      // Scroll progress
+      const progress = document.getElementById('scrollProgress');
+      window.addEventListener('scroll', NT.utils.throttle(() => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+        progress.style.width = pct + '%';
+      }, 50), { passive: true });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Search — NamiTube</title>
+  <meta name="description" content="Search thousands of anime titles. Filter by genre, year, score, and more." />
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/search.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <meta property="og:title" content="Search — NamiTube" />
+  <meta property="og:description" content="Search thousands of anime titles. Filter by genre, year, score, and more." />
+  <meta property="og:type" content="website" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div id="header-slot"></div>
+
+  <main id="main" role="main" class="container search-wrap">
+    <section class="search-hero">
+      <h1>Find Your Next Favourite</h1>
+      <div class="search-input-wrap">
+        <span class="icon" id="searchIcon"></span>
+        <input type="search" id="searchInput" placeholder="Search anime titles…" autocomplete="off" aria-label="Search anime" />
+        <button class="clear-btn" id="searchClear" type="button" aria-label="Clear search"></button>
+      </div>
+      <div class="recent-searches" id="recentSearches"></div>
+    </section>
+
+    <button class="btn btn-ghost filter-toggle" id="filterToggle" type="button">
+      <span id="filterToggleIcon"></span> Filters
+    </button>
+
+    <div class="search-layout">
+      <aside class="filters" id="filters" role="complementary" aria-label="Search filters">
+        <h3></h3>
+        <div id="filterList"></div>
+      </aside>
+
+      <div>
+        <p class="search-status" id="searchStatus">Start typing to search…</p>
+        <div class="search-results" id="searchResults"></div>
+        <div class="search-load-more" id="loadMore" style="display:none">
+          <button class="btn btn-secondary" id="loadMoreBtn">Load More</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-slot"></div>
+
+  <script src="js/utils.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/storage.js" defer></script>
+  <script src="js/components.js" defer></script>
+  <script src="js/search.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const profile = NT.storage.getProfile();
+      if (profile.preferences.accentColor) NT.utils.applyAccentColor(profile.preferences.accentColor);
+      NT.components.injectChrome();
+
+      // Render icons
+      document.getElementById('searchIcon').innerHTML = NT.components.Icons.search;
+      const clearBtn = document.getElementById('searchClear');
+      clearBtn.innerHTML = NT.components.Icons.x;
+      const filterToggle = document.getElementById('filterToggle');
+      document.getElementById('filterToggleIcon').innerHTML = NT.components.Icons.settings;
+
+      // Filters heading
+      document.querySelector('.filters h3').innerHTML = NT.components.Icons.settings + ' Filters';
+
+      // Mobile filter toggle
+      filterToggle.addEventListener('click', () => {
+        const filters = document.getElementById('filters');
+        filters.classList.toggle('open');
+      });
+
+      // Load more
+      document.getElementById('loadMoreBtn').addEventListener('click', () => {
+        NT.searchPage.loadMore();
+      });
+
+      await NT.searchPage.init();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Home — NamiTube</title>
+  <meta name="description" content="Discover trending anime, the current season, top-rated classics, and what's airing today. Stream free in HD." />
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <meta property="og:title" content="Home — NamiTube" />
+  <meta property="og:description" content="Discover trending anime, the current season, top-rated classics, and what's airing today." />
+  <meta property="og:type" content="website" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <div id="header-slot"></div>
+
+  <main id="main" role="main">
+    <div class="container">
+      <!-- Spotlight -->
+      <section class="home-section" aria-label="Featured">
+        <div id="spotlight"></div>
+      </section>
+
+      <!-- Trending -->
+      <section class="home-section" aria-label="Trending">
+        <div class="section-head">
+          <h2>Trending This Week</h2>
+          <a href="search.html">More →</a>
+        </div>
+        <div class="anime-row stagger" id="trendingRow"></div>
+      </section>
+
+      <!-- New Episodes Today -->
+      <section class="home-section" aria-label="Airing Today">
+        <div class="section-head">
+          <h2>New Episodes Today</h2>
+          <a href="schedule.html">Full Schedule →</a>
+        </div>
+        <div class="anime-grid" id="newTodayRow"></div>
+      </section>
+
+      <!-- This Season -->
+      <section class="home-section" aria-label="This Season">
+        <div class="section-head">
+          <h2>This Season</h2>
+          <a href="search.html">View all →</a>
+        </div>
+        <div class="anime-grid" id="seasonRow"></div>
+      </section>
+
+      <!-- Genre tabs -->
+      <section class="home-section" aria-label="Browse by Genre">
+        <div class="section-head">
+          <h2>Browse by Genre</h2>
+        </div>
+        <div class="genre-tabs" id="genreTabs" role="tablist"></div>
+        <div class="anime-grid" id="genreGrid"></div>
+      </section>
+
+      <!-- Top Rated -->
+      <section class="home-section" aria-label="Top Rated">
+        <div class="section-head">
+          <h2>Top Rated of All Time</h2>
+          <a href="search.html?order=score">View all →</a>
+        </div>
+        <div class="anime-row" id="topRatedRow"></div>
+      </section>
+
+      <!-- Upcoming -->
+      <section class="home-section" aria-label="Upcoming">
+        <div class="section-head">
+          <h2>Upcoming</h2>
+          <a href="search.html?status=upcoming">View all →</a>
+        </div>
+        <div class="anime-grid" id="upcomingRow"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-slot"></div>
+
+  <script src="js/utils.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/storage.js" defer></script>
+  <script src="js/components.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const profile = NT.storage.getProfile();
+      if (profile.preferences.accentColor) NT.utils.applyAccentColor(profile.preferences.accentColor);
+      NT.components.injectChrome();
+
+      const GENRES = [
+        { id: 1,   name: 'Action' },
+        { id: 22,  name: 'Romance' },
+        { id: 49,  name: 'Isekai' },
+        { id: 27,  name: 'Shonen' },
+        { id: 42,  name: 'Seinen' },
+        { id: 14,  name: 'Horror' },
+        { id: 10,  name: 'Fantasy' },
+        { id: 4,   name: 'Comedy' }
+      ];
+
+      // Build skeleton placeholders
+      const trendingRow = document.getElementById('trendingRow');
+      const newTodayRow = document.getElementById('newTodayRow');
+      const seasonRow = document.getElementById('seasonRow');
+      const topRatedRow = document.getElementById('topRatedRow');
+      const upcomingRow = document.getElementById('upcomingRow');
+      const spotlight = document.getElementById('spotlight');
+      const genreGrid = document.getElementById('genreGrid');
+      const genreTabs = document.getElementById('genreTabs');
+
+      // Skeletons
+      for (let i = 0; i < 8; i++) trendingRow.appendChild(NT.utils.Skeletons.card('md'));
+      for (let i = 0; i < 8; i++) newTodayRow.appendChild(NT.utils.Skeletons.card('md'));
+      for (let i = 0; i < 12; i++) seasonRow.appendChild(NT.utils.Skeletons.card('md'));
+      for (let i = 0; i < 10; i++) topRatedRow.appendChild(NT.utils.Skeletons.card('md'));
+      for (let i = 0; i < 8; i++) upcomingRow.appendChild(NT.utils.Skeletons.card('md'));
+      for (let i = 0; i < 12; i++) genreGrid.appendChild(NT.utils.Skeletons.card('md'));
+
+      // Spotlight placeholder
+      const spotSkeleton = document.createElement('div');
+      spotSkeleton.className = 'skeleton';
+      spotSkeleton.style.cssText = 'width:100%;aspect-ratio:21/9;border-radius:var(--radius-lg);max-height:520px';
+      spotlight.appendChild(spotSkeleton);
+
+      // Render genre tabs
+      GENRES.forEach((g, i) => {
+        const tab = document.createElement('button');
+        tab.className = 'genre-tab' + (i === 0 ? ' active' : '');
+        tab.textContent = g.name;
+        tab.dataset.id = g.id;
+        tab.addEventListener('click', () => {
+          genreTabs.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          loadGenre(g.id);
+        });
+        genreTabs.appendChild(tab);
+      });
+
+      async function loadGenre(id) {
+        genreGrid.innerHTML = '';
+        for (let i = 0; i < 12; i++) genreGrid.appendChild(NT.utils.Skeletons.card('md'));
+        try {
+          const res = await NT.api.search({ genres: id, orderBy: 'score', sort: 'desc', limit: 12 });
+          genreGrid.innerHTML = '';
+          (res.data || []).forEach((a, i) => {
+            const c = NT.components.AnimeCard(a, { size: 'md' });
+            c.style.animation = `fadeUp 500ms ${i * 30}ms ease both`;
+            genreGrid.appendChild(c);
+          });
+        } catch (e) {
+          genreGrid.innerHTML = '<p class="text-soft">Failed to load genre.</p>';
+        }
+      }
+
+      try {
+        // Parallel fetch: spotlight candidates, trending, today schedule, this season, top, upcoming
+        const today = NT.utils.Formatters.weekday();
+        const [topAiring, scheduleToday, season, topRated, upcoming] = await Promise.all([
+          NT.api.topAnime({ filter: 'airing', limit: 12 }),
+          NT.api.schedule(today).catch(() => ({ data: [] })),
+          NT.api.seasonsNow({ limit: 12 }),
+          NT.api.topAnime({ filter: 'bypopularity', limit: 10 }),
+          NT.api.seasonsUpcoming({ limit: 8 })
+        ]);
+
+        // Spotlight — pick first 5 from topAiring
+        if (topAiring.data && topAiring.data.length) {
+          const hero = NT.components.HeroSpotlight(topAiring.data.slice(0, 5));
+          spotlight.innerHTML = '';
+          if (hero) spotlight.appendChild(hero);
+        }
+
+        // Trending row
+        trendingRow.innerHTML = '';
+        (topAiring.data || []).forEach((a, i) => {
+          const c = NT.components.AnimeCard(a, { size: 'md' });
+          c.style.animation = `fadeUp 500ms ${i * 30}ms ease both`;
+          trendingRow.appendChild(c);
+        });
+
+        // Today's schedule grid
+        newTodayRow.innerHTML = '';
+        const todayList = (scheduleToday.data || []).slice(0, 12);
+        if (todayList.length === 0) {
+          newTodayRow.innerHTML = '<p class="text-soft" style="grid-column:1/-1;text-align:center;padding:var(--space-6)">No episodes airing today. Check the <a href="schedule.html" style="color:var(--color-accent)">full schedule</a>.</p>';
+        } else {
+          todayList.forEach((a, i) => {
+            const c = NT.components.AnimeCard(a, { size: 'md' });
+            c.style.animation = `fadeUp 500ms ${i * 30}ms ease both`;
+            newTodayRow.appendChild(c);
+          });
+        }
+
+        // This season
+        seasonRow.innerHTML = '';
+        (season.data || []).forEach((a, i) => {
+          const c = NT.components.AnimeCard(a, { size: 'md' });
+          c.style.animation = `fadeUp 500ms ${i * 30}ms ease both`;
+          seasonRow.appendChild(c);
+        });
+
+        // Top rated
+        topRatedRow.innerHTML = '';
+        (topRated.data || []).forEach((a, i) => {
+          const c = NT.components.AnimeCard(a, { size: 'md' });
+          c.style.animation = `fadeUp 500ms ${i * 30}ms ease both`;
+          topRatedRow.appendChild(c);
+        });
+
+        // Upcoming
+        upcomingRow.innerHTML = '';
+        (upcoming.data || []).forEach((a, i) => {
+          const c = NT.components.AnimeCard(a, { size: 'md' });
+          c.style.animation = `fadeUp 500ms ${i * 30}ms ease both`;
+          upcomingRow.appendChild(c);
+        });
+
+        // Initial genre load
+        loadGenre(GENRES[0].id);
+
+      } catch (e) {
+        console.error('Home load error', e);
+        NT.components.Toast('Failed to load some content. Please refresh.', 'error');
+      }
+
+      NT.utils.setupReveal();
+    });
+  </script>
+</body>
+</html>
