@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support NamiTube</title>
+  <meta name="description" content="Support NamiTube and help keep the platform free for everyone.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/donate.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="donate-page">
+  <div id="header-root"></div>
+
+  <main id="main" class="container">
+    <div class="donate-hero reveal">
+      <h1>Support NamiTube</h1>
+      <p>NamiTube is a free, community-driven platform. Your support helps us cover server costs, domain fees, and development time to keep the experience premium for everyone.</p>
+    </div>
+
+    <div class="tiers-grid reveal">
+      <div class="tier-card">
+        <div class="tier-name">Supporter</div>
+        <div class="tier-price">$3</div>
+        <p class="tier-desc">Help keep the lights on. Every contribution matters and keeps the site ad-free.</p>
+        <a href="#" class="btn btn-secondary" style="width:100%">Donate via Ko-fi</a>
+      </div>
+      <div class="tier-card featured">
+        <div class="tier-name">Champion</div>
+        <div class="tier-price">$10</div>
+        <p class="tier-desc">Get a shoutout on our supporters wall and priority feature requests.</p>
+        <a href="#" class="btn btn-primary" style="width:100%">Donate via Ko-fi</a>
+      </div>
+      <div class="tier-card">
+        <div class="tier-name">Legend</div>
+        <div class="tier-price">$25</div>
+        <p class="tier-desc">Directly fund new features and infrastructure upgrades. You make NamiTube possible.</p>
+        <a href="#" class="btn btn-secondary" style="width:100%">Donate via Ko-fi</a>
+      </div>
+    </div>
+
+    <div class="perks-section reveal">
+      <h3 class="section-subtitle" style="text-align:center;margin-bottom:8px">What Your Support Covers</h3>
+      <div class="perks-list">
+        <div class="perk-item"><i data-lucide="server"></i> Server hosting and CDN bandwidth</div>
+        <div class="perk-item"><i data-lucide="globe"></i> Domain and SSL certificates</div>
+        <div class="perk-item"><i data-lucide="code-2"></i> Development time and new features</div>
+        <div class="perk-item"><i data-lucide="shield"></i> Security updates and maintenance</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="text-align:center;margin-bottom:48px">
+      <h3 class="section-subtitle" style="margin-bottom:12px">Other Ways to Help</h3>
+      <p style="color:var(--color-text-secondary);max-width:600px;margin:0 auto 20px">Can't donate? No problem. You can still help by sharing NamiTube with friends, starring the project on GitHub, or reporting broken links.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="#" class="btn btn-secondary"><i data-lucide="share-2"></i> Share</a>
+        <a href="#" class="btn btn-secondary"><i data-lucide="github"></i> Star on GitHub</a>
+        <a href="#" class="btn btn-secondary"><i data-lucide="flag"></i> Report Link</a>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-bottom:48px">
+      <h3 class="section-subtitle" style="text-align:center;margin-bottom:8px">Supporters Wall</h3>
+      <div class="supporters-wall" id="supporters-wall"></div>
+    </div>
+
+    <div class="faq-section reveal">
+      <h3 class="section-subtitle" style="text-align:center;margin-bottom:20px">Frequently Asked Questions</h3>
+      <div id="faq-container"></div>
+    </div>
+  </main>
+
+  <div id="footer-root"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    const supporters = [
+      'Kaito','Hinata','Sakura','Ren','Yuki','Takeshi','Aiko','Haruto','Mei','Daichi',
+      'NamiFan_01','OtakuKing','SenpaiNoticeMe','ChibiChan','NeoTokyo','ShonenJump',
+      'RamonaFlowers','VashTheStampede','SpikeSpiegel','MotokoK'
+    ];
+
+    const faqs = [
+      { q: 'Is NamiTube free to use?', a: 'Yes, NamiTube is completely free. We do not charge users and rely on community support to stay online.' },
+      { q: 'Where does the content come from?', a: 'We do not host any video files. All content is embedded from third-party streaming providers. We simply provide an organized interface.' },
+      { q: 'Is my data safe?', a: 'All personal data (watchlist, history, preferences) is stored locally in your browser via localStorage. We do not collect or store it on our servers.' },
+      { q: 'Can I request a feature?', a: 'Absolutely. Reach out on Discord or GitHub. Champions and Legends get priority for feature requests.' }
+    ];
+
+    document.getElementById('supporters-wall').innerHTML = supporters.map(s => `<span class="supporter-name">${escapeHtml(s)}</span>`).join('');
+
+    document.getElementById('faq-container').innerHTML = faqs.map((f, i) => `
+      <div class="faq-item" id="faq-${i}">
+        <button class="faq-question" onclick="toggleFaq(${i})">
+          ${escapeHtml(f.q)}
+          <i data-lucide="chevron-down" class="faq-icon"></i>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">${escapeHtml(f.a)}</div></div>
+      </div>
+    `).join('');
+
+    window.toggleFaq = function(i) {
+      document.getElementById(`faq-${i}`).classList.toggle('open');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCommon('donate');
+      if (window.lucide) lucide.createIcons();
+      setupReveal();
+    });
+  </script>
+</body>
+</html>

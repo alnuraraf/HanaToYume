@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule — NamiTube</title>
+  <meta name="description" content="Weekly anime airing schedule on NamiTube.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/schedule.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="schedule-page">
+  <div id="header-root"></div>
+
+  <main id="main" class="container">
+    <div class="schedule-hero reveal">
+      <h1>Airing Schedule</h1>
+      <p>Track when new episodes drop throughout the week.</p>
+    </div>
+
+    <div class="countdown-banner reveal" id="next-countdown" style="display:none">
+      <label>Next Episode in Your Watchlist</label>
+      <div class="timer" id="watchlist-timer">--:--:--</div>
+    </div>
+
+    <div class="day-tabs reveal" id="day-tabs"></div>
+    <div class="schedule-list-full" id="schedule-list">
+      <div class="loading-state"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <div id="footer-root"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    const today = getDayName();
+    let activeDay = params.day || today;
+
+    function initTabs() {
+      const container = document.getElementById('day-tabs');
+      container.innerHTML = days.map(d => `
+        <button class="day-tab ${d===activeDay?'active':''} ${d===today?'today':''}" onclick="loadDay('${d}')">
+          ${d.charAt(0).toUpperCase() + d.slice(1)}
+        </button>
+      `).join('');
+    }
+
+    async function loadDay(day) {
+      activeDay = day;
+      initTabs();
+      const list = document.getElementById('schedule-list');
+      list.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+      try {
+        const res = await Jikan.schedules(day);
+        const items = res.data || [];
+        if (!items.length) {
+          list.innerHTML = '<p class="text-secondary" style="padding:24px">No anime scheduled for this day.</p>';
+          return;
+        }
+        const reminders = getReminders();
+        const reminderIds = new Set(reminders.map(r => r.malId));
+
+        list.innerHTML = items.map(a => {
+          const hasReminder = reminderIds.has(a.mal_id);
+          return `
+            <div class="schedule-card reveal">
+              <img src="${a.images?.jpg?.image_url || ''}" alt="" loading="lazy">
+              <div class="schedule-card-info">
+                <div class="schedule-card-title">${escapeHtml(a.title_english || a.title)}</div>
+                <div class="schedule-card-meta">
+                  ${a.type || 'TV'} &bull; Ep ${a.episodes || '?'} &bull; ${(a.genres || []).slice(0,3).map(g=>g.name).join(', ')} &bull; Score ${a.score || 'N/A'}
+                </div>
+              </div>
+              <div class="schedule-card-time">${a.broadcast?.time || 'TBA'}</div>
+              <div class="schedule-card-actions">
+                <a href="anime.html?id=${a.mal_id}" class="btn btn-primary btn-sm">Details</a>
+                <button class="btn btn-secondary btn-sm" onclick="toggleReminder(${a.mal_id}, '${escapeHtml(a.title_english || a.title).replace(/'/g,"\'")}', '${day}', '${a.broadcast?.time || ''}')" id="rem-${a.mal_id}">
+                  ${hasReminder ? '<i data-lucide="bell-off"></i>' : '<i data-lucide="bell"></i>'}
+                  ${hasReminder ? 'Remove' : 'Remind'}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        if (window.lucide) lucide.createIcons();
+        setupReveal();
+      } catch (e) {
+        list.innerHTML = '<p class="text-secondary" style="padding:24px">Schedule unavailable.</p>';
+      }
+    }
+
+    window.toggleReminder = function(malId, title, day, time) {
+      const btn = document.getElementById(`rem-${malId}`);
+      const has = getReminders().some(r => r.malId === malId);
+      if (has) {
+        removeReminder(malId);
+        if (btn) { btn.innerHTML = '<i data-lucide="bell"></i> Remind'; Toast('Reminder removed', 'info'); }
+      } else {
+        addReminder(malId, title, day, time);
+        if (btn) { btn.innerHTML = '<i data-lucide="bell-off"></i> Remove'; Toast('Reminder set', 'success'); }
+      }
+      if (window.lucide) lucide.createIcons();
+    };
+
+    function initWatchlistCountdown() {
+      const reminders = getReminders();
+      if (!reminders.length) return;
+      const now = new Date();
+      const todayName = days[now.getDay()];
+      const todayReminders = reminders.filter(r => r.dayOfWeek === todayName);
+      if (!todayReminders.length) return;
+
+      document.getElementById('next-countdown').style.display = 'block';
+      const target = new Date();
+      const [h, m] = (todayReminders[0].broadcastTime || '00:00').split(':').map(Number);
+      target.setHours(h || 0, m || 0, 0, 0);
+      if (target < now) target.setDate(target.getDate() + 1);
+
+      function update() {
+        const diff = Math.floor((target - Date.now()) / 1000);
+        if (diff <= 0) { document.getElementById('watchlist-timer').textContent = 'Airing now!'; return; }
+        const d = Math.floor(diff / 86400);
+        const hh = Math.floor((diff % 86400) / 3600);
+        const mm = Math.floor((diff % 3600) / 60);
+        const ss = diff % 60;
+        document.getElementById('watchlist-timer').textContent =
+          `${d}d ${hh.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`;
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCommon('schedule');
+      initTabs();
+      loadDay(activeDay);
+      initWatchlistCountdown();
+    });
+  </script>
+</body>
+</html>

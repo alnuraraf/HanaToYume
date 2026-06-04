@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — NamiTube</title>
+  <meta name="description" content="Browse trending, seasonal, and top-rated anime. Your personal anime hub.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/home.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="home-page">
+  <div id="header-root"></div>
+
+  <main id="main" class="container">
+    <section class="spotlight-section reveal">
+      <div class="spotlight-container" id="spotlight">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-header">
+        <h2 class="section-title">Trending Anime</h2>
+        <a href="search.html?sort=trending" class="section-more">View all <i data-lucide="chevron-right" class="icon-sm"></i></a>
+      </div>
+      <div class="scroll-row" id="trending-row"></div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-header">
+        <h2 class="section-title">New Episodes Today</h2>
+      </div>
+      <div class="schedule-strip" id="schedule-today">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-header">
+        <h2 class="section-title">This Season</h2>
+        <a href="search.html?season=now" class="section-more">View all <i data-lucide="chevron-right" class="icon-sm"></i></a>
+      </div>
+      <div class="anime-grid" id="season-grid"></div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-header">
+        <h2 class="section-title">Top Rated All Time</h2>
+      </div>
+      <div class="scroll-row" id="top-row"></div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-header">
+        <h2 class="section-title">Upcoming</h2>
+      </div>
+      <div class="anime-grid" id="upcoming-grid"></div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-header">
+        <h2 class="section-title">Browse by Genre</h2>
+      </div>
+      <div class="genre-tabs" id="genre-tabs">
+        <button class="genre-tab active" data-genre="1">Action</button>
+        <button class="genre-tab" data-genre="22">Romance</button>
+        <button class="genre-tab" data-genre="62">Isekai</button>
+        <button class="genre-tab" data-genre="27">Shonen</button>
+        <button class="genre-tab" data-genre="42">Seinen</button>
+        <button class="genre-tab" data-genre="14">Horror</button>
+        <button class="genre-tab" data-genre="10">Fantasy</button>
+        <button class="genre-tab" data-genre="4">Comedy</button>
+      </div>
+      <div class="anime-grid" id="genre-grid"></div>
+    </section>
+  </main>
+
+  <div id="footer-root"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    let spotlightAnimes = [];
+    let spotlightIndex = 0;
+
+    async function initSpotlight() {
+      const container = document.getElementById('spotlight');
+      try {
+        const res = await Jikan.topAiring(1);
+        if (!res.data || !res.data.length) throw new Error('No spotlight data');
+        spotlightAnimes = res.data.slice(0, 5);
+
+        function renderSpotlight(idx) {
+          const anime = spotlightAnimes[idx];
+          const title = anime.title_english || anime.title;
+          const genres = (anime.genres || []).map(g => g.name).slice(0, 4);
+
+          container.innerHTML = `
+            <div class="spotlight-bg" style="background-image:url('${anime.images?.jpg?.large_image_url || ''}')"></div>
+            <div class="hero-gradient"></div>
+            <div class="spotlight-content">
+              <div class="spotlight-meta">
+                ${genres.map(g => `<span class="genre-pill">${escapeHtml(g)}</span>`).join('')}
+                ${anime.score ? `<span class="score-badge"><i data-lucide="star" class="icon-sm"></i> ${anime.score}</span>` : ''}
+              </div>
+              <h2 class="spotlight-title">${escapeHtml(title)}</h2>
+              <p class="spotlight-synopsis">${escapeHtml((anime.synopsis || '').substring(0, 200))}...</p>
+              <div class="spotlight-actions">
+                <a href="watch.html?id=${anime.mal_id}&ep=1&lang=sub" class="btn btn-primary"><i data-lucide="play"></i> Watch Now</a>
+                <button class="btn btn-secondary watchlist-add" data-mal="${anime.mal_id}" data-title="${escapeHtml(title)}" data-poster="${anime.images?.jpg?.image_url || ''}" data-score="${anime.score || 0}">
+                  <i data-lucide="plus"></i> Add to Watchlist
+                </button>
+              </div>
+            </div>
+            <div class="spotlight-nav">
+              <button onclick="prevSpotlight()" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
+              <button onclick="nextSpotlight()" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+            </div>
+          `;
+          if (window.lucide) lucide.createIcons({ nodes: container.querySelectorAll('[data-lucide]') });
+        }
+
+        renderSpotlight(0);
+        setInterval(() => {
+          spotlightIndex = (spotlightIndex + 1) % spotlightAnimes.length;
+          renderSpotlight(spotlightIndex);
+        }, 10000);
+
+        window.prevSpotlight = () => {
+          spotlightIndex = (spotlightIndex - 1 + spotlightAnimes.length) % spotlightAnimes.length;
+          renderSpotlight(spotlightIndex);
+        };
+        window.nextSpotlight = () => {
+          spotlightIndex = (spotlightIndex + 1) % spotlightAnimes.length;
+          renderSpotlight(spotlightIndex);
+        };
+      } catch (e) {
+        container.innerHTML = '<div class="loading-state text-secondary">Failed to load spotlight.</div>';
+      }
+    }
+
+    async function initTrending() {
+      const row = document.getElementById('trending-row');
+      row.innerHTML = SkeletonGrid(8);
+      try {
+        const res = await Jikan.topAiring(1);
+        row.innerHTML = (res.data || []).slice(0, 8).map(a => AnimeCard(a, { size: 'md' })).join('');
+        if (window.lucide) lucide.createIcons();
+        setupLazyImages();
+      } catch (e) { row.innerHTML = '<p class="text-secondary">Failed to load.</p>'; }
+    }
+
+    async function initSchedule() {
+      const el = document.getElementById('schedule-today');
+      try {
+        const day = getDayName();
+        const res = await Jikan.schedules(day);
+        const items = (res.data || []).slice(0, 5);
+        if (!items.length) {
+          el.innerHTML = '<p class="text-secondary" style="padding:16px">No episodes scheduled for today.</p>';
+          return;
+        }
+        el.innerHTML = `
+          <div class="schedule-list">
+            ${items.map(a => `
+              <a href="anime.html?id=${a.mal_id}" class="schedule-item">
+                <img src="${a.images?.jpg?.image_url || ''}" alt="" loading="lazy">
+                <div class="schedule-info">
+                  <div class="schedule-title">${escapeHtml(a.title_english || a.title)}</div>
+                  <div class="schedule-meta">${a.type || 'TV'} &bull; Ep ${(a.episodes || 'N/A')}</div>
+                </div>
+                <span class="schedule-time">${a.broadcast?.time || 'TBA'}</span>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } catch (e) { el.innerHTML = '<p class="text-secondary" style="padding:16px">Schedule unavailable.</p>'; }
+    }
+
+    async function initSeason() {
+      const grid = document.getElementById('season-grid');
+      grid.innerHTML = SkeletonGrid(12);
+      try {
+        const res = await Jikan.seasonNow(1);
+        grid.innerHTML = (res.data || []).slice(0, 12).map(a => AnimeCard(a, { size: 'md' })).join('');
+        if (window.lucide) lucide.createIcons();
+        setupLazyImages();
+      } catch (e) { grid.innerHTML = '<p class="text-secondary">Failed to load.</p>'; }
+    }
+
+    async function initTopRated() {
+      const row = document.getElementById('top-row');
+      row.innerHTML = SkeletonGrid(10);
+      try {
+        const res = await Jikan.topPopular(1);
+        row.innerHTML = (res.data || []).slice(0, 10).map(a => AnimeCard(a, { size: 'md' })).join('');
+        if (window.lucide) lucide.createIcons();
+        setupLazyImages();
+      } catch (e) { row.innerHTML = '<p class="text-secondary">Failed to load.</p>'; }
+    }
+
+    async function initUpcoming() {
+      const grid = document.getElementById('upcoming-grid');
+      grid.innerHTML = SkeletonGrid(8);
+      try {
+        const res = await Jikan.seasonUpcoming(1);
+        grid.innerHTML = (res.data || []).slice(0, 8).map(a => AnimeCard(a, { size: 'md' })).join('');
+        if (window.lucide) lucide.createIcons();
+        setupLazyImages();
+      } catch (e) { grid.innerHTML = '<p class="text-secondary">Failed to load.</p>'; }
+    }
+
+    async function initGenre(genreId = 1) {
+      const grid = document.getElementById('genre-grid');
+      grid.innerHTML = SkeletonGrid(12);
+      try {
+        const res = await Jikan.animeByGenre(genreId, 1);
+        grid.innerHTML = (res.data || []).slice(0, 12).map(a => AnimeCard(a, { size: 'md' })).join('');
+        if (window.lucide) lucide.createIcons();
+        setupLazyImages();
+      } catch (e) { grid.innerHTML = '<p class="text-secondary">Failed to load genre.</p>'; }
+    }
+
+    document.addEventListener('click', (e) => {
+      const tab = e.target.closest('.genre-tab');
+      if (!tab) return;
+      document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      initGenre(Number(tab.dataset.genre));
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCommon('home');
+      initSpotlight();
+      initTrending();
+      initSchedule();
+      initSeason();
+      initTopRated();
+      initUpcoming();
+      initGenre(1);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library — NamiTube</title>
+  <meta name="description" content="Your personal anime library, watchlist, favorites, and history on NamiTube.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/library.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="library-page">
+  <div id="header-root"></div>
+
+  <main id="main" class="container">
+    <h1 class="section-title reveal" style="margin-bottom:24px">My Library</h1>
+
+    <div class="library-tabs reveal">
+      <button class="library-tab active" onclick="setTab('watchlist')">Watchlist</button>
+      <button class="library-tab" onclick="setTab('favorites')">Favorites</button>
+      <button class="library-tab" onclick="setTab('history')">History</button>
+    </div>
+
+    <div class="library-toolbar reveal">
+      <div id="toolbar-left"></div>
+      <div class="library-sort" id="toolbar-right"></div>
+    </div>
+
+    <div id="library-content"></div>
+  </main>
+
+  <div id="footer-root"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    const urlParams = getUrlParams();
+    let activeTab = urlParams.tab || 'watchlist';
+
+    function setTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.library-tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase().includes(tab)));
+      render();
+    }
+
+    function render() {
+      const content = document.getElementById('library-content');
+      const left = document.getElementById('toolbar-left');
+      const right = document.getElementById('toolbar-right');
+
+      if (activeTab === 'watchlist') renderWatchlist(content, left, right);
+      else if (activeTab === 'favorites') renderFavorites(content, left, right);
+      else renderHistory(content, left, right);
+    }
+
+    function renderWatchlist(content, left, right) {
+      const list = getWatchlist();
+      left.innerHTML = `<span class="text-secondary">${list.length} items</span>`;
+      right.innerHTML = `
+        <select onchange="sortWatchlist(this.value)">
+          <option value="added">Date Added</option>
+          <option value="title">Title</option>
+          <option value="score">Score</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="exportJSON('watchlist')"><i data-lucide="download"></i> Export</button>
+      `;
+      if (!list.length) {
+        content.innerHTML = emptyState('Your watchlist is empty.', 'Browse anime to add them here.');
+        return;
+      }
+      content.innerHTML = `<div class="anime-grid">${list.map(item => `
+        <div class="anime-card reveal" data-mal="${item.malId}">
+          <a href="anime.html?id=${item.malId}" class="card-link">
+            <div class="card-image-wrap">
+              <img src="${item.posterUrl}" alt="" loading="lazy">
+              <div class="card-overlay">
+                <span class="watch-btn"><i data-lucide="play-circle"></i> Watch Now</span>
+              </div>
+            </div>
+            <div class="card-info">
+              <h3 class="card-title">${escapeHtml(item.title)}</h3>
+            </div>
+          </a>
+          <div style="padding:0 12px 12px;display:flex;gap:8px;align-items:center">
+            <select class="status-select" onchange="updateStatus(${item.malId}, this.value)">
+              <option value="plan" ${item.status==='plan'?'selected':''}>Plan to Watch</option>
+              <option value="watching" ${item.status==='watching'?'selected':''}>Watching</option>
+              <option value="completed" ${item.status==='completed'?'selected':''}>Completed</option>
+              <option value="dropped" ${item.status==='dropped'?'selected':''}>Dropped</option>
+            </select>
+            <button class="icon-btn" style="width:28px;height:28px" onclick="removeWatchlist(${item.malId})" title="Remove"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button>
+          </div>
+        </div>
+      `).join('')}</div>`;
+      if (window.lucide) lucide.createIcons();
+      setupReveal();
+    }
+
+    function renderFavorites(content, left, right) {
+      const list = getFavorites();
+      left.innerHTML = `<span class="text-secondary">${list.length} items</span>`;
+      right.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="exportJSON('favorites')"><i data-lucide="download"></i> Export</button>`;
+      if (!list.length) {
+        content.innerHTML = emptyState('No favorites yet.', 'Heart your favorite anime to see them here.');
+        return;
+      }
+      content.innerHTML = `<div class="anime-grid">${list.map(item => `
+        <div class="anime-card reveal" data-mal="${item.malId}">
+          <a href="anime.html?id=${item.malId}" class="card-link">
+            <div class="card-image-wrap">
+              <img src="${item.posterUrl}" alt="" loading="lazy">
+              <div class="card-overlay">
+                <span class="watch-btn"><i data-lucide="play-circle"></i> Watch Now</span>
+              </div>
+            </div>
+            <div class="card-info">
+              <h3 class="card-title">${escapeHtml(item.title)}</h3>
+            </div>
+          </a>
+          <div style="padding:0 12px 12px">
+            <button class="btn btn-secondary btn-sm" style="width:100%" onclick="toggleFavorite(${item.malId})">Remove</button>
+          </div>
+        </div>
+      `).join('')}</div>`;
+      if (window.lucide) lucide.createIcons();
+      setupReveal();
+    }
+
+    function renderHistory(content, left, right) {
+      const list = getHistory();
+      left.innerHTML = `<span class="text-secondary">${list.length} items</span>`;
+      right.innerHTML = `
+        <button class="btn btn-secondary btn-sm" onclick="clearHistoryConfirm()"><i data-lucide="trash-2"></i> Clear</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportJSON('history')"><i data-lucide="download"></i> Export</button>
+      `;
+      if (!list.length) {
+        content.innerHTML = emptyState('No watch history.', 'Start watching anime to build your history.');
+        return;
+      }
+      content.innerHTML = `<div class="history-list">${list.map(h => `
+        <div class="history-item reveal">
+          <img src="${h.posterUrl || ''}" alt="" loading="lazy">
+          <div class="history-info">
+            <div class="history-title">${escapeHtml(h.title)}</div>
+            <div class="history-meta">Episode ${h.episode} of ${h.totalEpisodes || '?'} &bull; ${timeAgo(h.timestamp)}</div>
+          </div>
+          <div class="history-progress">
+            <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, ((h.episode/(h.totalEpisodes||1))*100))}%"></div></div>
+          </div>
+          <a href="watch.html?id=${h.malId}&ep=${h.episode}&lang=sub" class="btn btn-primary btn-sm">Continue</a>
+        </div>
+      `).join('')}</div>`;
+      setupReveal();
+    }
+
+    function emptyState(title, desc) {
+      return `
+        <div class="empty-state reveal">
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(desc)}</p>
+          <a href="home.html" class="btn btn-primary">Browse Anime</a>
+        </div>
+      `;
+    }
+
+    window.updateStatus = function(malId, status) {
+      updateWatchlistStatus(malId, status);
+      Toast('Status updated', 'success');
+    };
+    window.removeWatchlist = function(malId) {
+      removeFromWatchlist(malId);
+      render();
+      Toast('Removed from watchlist', 'info');
+    };
+    window.toggleFavorite = function(malId) {
+      const list = getFavorites();
+      const item = list.find(f => f.malId === malId);
+      if (item) toggleFavorite(malId, item.title, item.posterUrl, item.score);
+      render();
+    };
+    window.clearHistoryConfirm = function() {
+      Modal('Clear History', '<p>Are you sure you want to clear your entire watch history? This cannot be undone.</p>', [
+        { label: 'Cancel', class: 'btn-secondary', action: 'close' },
+        { label: 'Clear', class: 'btn-primary', action: 'confirm' }
+      ]);
+      document.querySelector('[data-action="confirm"]').addEventListener('click', () => {
+        clearHistory();
+        document.getElementById('modal-overlay').remove();
+        render();
+        Toast('History cleared', 'info');
+      });
+      document.querySelector('[data-action="close"]').addEventListener('click', () => {
+        document.getElementById('modal-overlay').remove();
+      });
+    };
+    window.sortWatchlist = function(key) {
+      let list = getWatchlist();
+      if (key === 'title') list.sort((a,b) => a.title.localeCompare(b.title));
+      if (key === 'score') list.sort((a,b) => (b.score||0) - (a.score||0));
+      if (key === 'added') list.sort((a,b) => b.addedAt - a.addedAt);
+      const p = getProfile();
+      p.watchlist = list;
+      saveProfile(p);
+      render();
+    };
+    window.exportJSON = function(type) {
+      let data;
+      if (type === 'watchlist') data = getWatchlist();
+      else if (type === 'favorites') data = getFavorites();
+      else data = getHistory();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `namitube_${type}_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      Toast('Exported successfully', 'success');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCommon('library');
+      setTab(activeTab);
+    });
+  </script>
+</body>
+</html>

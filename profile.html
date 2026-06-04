@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — NamiTube</title>
+  <meta name="description" content="Manage your NamiTube profile, preferences, and stats.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/profile.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="profile-page">
+  <div id="header-root"></div>
+
+  <main id="main" class="container">
+    <div class="profile-header reveal">
+      <div class="avatar-wrap" onclick="document.getElementById('avatar-input').click()">
+        <img id="profile-avatar" src="" alt="Profile avatar">
+        <div class="avatar-overlay"><i data-lucide="camera"></i></div>
+      </div>
+      <input type="file" id="avatar-input" accept="image/*" onchange="handleAvatar(event)">
+      <div style="flex:1">
+        <input type="text" class="profile-name" id="display-name" value="AnimeUser" onblur="saveName()" onkeydown="if(event.key==='Enter'){this.blur()}">
+        <p class="profile-joined" id="join-date">Joined recently</p>
+        <div class="stats-row" id="stats-row"></div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <div class="profile-panel reveal">
+        <h3 class="panel-title">Preferences</h3>
+        <div class="pref-row">
+          <span class="pref-label">Default Language</span>
+          <div class="pref-control">
+            <label class="filter-checkbox"><input type="radio" name="lang" value="sub" onchange="setPref('defaultLang','sub')"> Sub</label>
+            <label class="filter-checkbox"><input type="radio" name="lang" value="dub" onchange="setPref('defaultLang','dub')"> Dub</label>
+          </div>
+        </div>
+        <div class="pref-row">
+          <span class="pref-label">Autoplay Next Episode</span>
+          <div class="pref-control">
+            <div class="toggle" id="toggle-autoplay" onclick="togglePref('autoplay')"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="pref-row">
+          <span class="pref-label">Show Mature Content Warning</span>
+          <div class="pref-control">
+            <div class="toggle" id="toggle-mature" onclick="togglePref('showMature')"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+        <div class="pref-row">
+          <span class="pref-label">Accent Color</span>
+          <div class="pref-control color-swatches" id="color-swatches"></div>
+        </div>
+      </div>
+
+      <div class="profile-panel reveal">
+        <h3 class="panel-title">Anime Stats</h3>
+        <div id="anime-stats"></div>
+      </div>
+
+      <div class="profile-panel danger-zone reveal">
+        <h3 class="panel-title">Danger Zone</h3>
+        <p style="color:var(--color-text-secondary);font-size:0.9rem;margin-bottom:16px">Once you delete your data, there is no going back. Please be certain.</p>
+        <button class="btn danger-btn" onclick="confirmWipe()"><i data-lucide="alert-triangle"></i> Clear All Data</button>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-root"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    const profile = ensureProfile();
+
+    function initProfile() {
+      document.getElementById('display-name').value = profile.displayName;
+      document.getElementById('join-date').textContent = 'Joined ' + formatDate(profile.joinDate);
+      document.getElementById('profile-avatar').src = profile.avatarBase64 || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.displayName)}&background=6c63ff&color=fff&size=256`;
+
+      const wl = getWatchlist();
+      const fav = getFavorites();
+      const hist = getHistory();
+      const epCount = hist.reduce((sum, h) => sum + (h.episode || 0), 0);
+
+      document.getElementById('stats-row').innerHTML = `
+        <div class="stat-box"><div class="stat-value">${hist.length}</div><div class="stat-label">Watched</div></div>
+        <div class="stat-box"><div class="stat-value">${wl.filter(w=>w.status==='watching').length}</div><div class="stat-label">Watching</div></div>
+        <div class="stat-box"><div class="stat-value">${fav.length}</div><div class="stat-label">Favorites</div></div>
+        <div class="stat-box"><div class="stat-value">${epCount}</div><div class="stat-label">Episodes</div></div>
+      `;
+
+      document.querySelector(`input[name="lang"][value="${profile.preferences.defaultLang}"]`).checked = true;
+      document.getElementById('toggle-autoplay').classList.toggle('active', profile.preferences.autoplay);
+      document.getElementById('toggle-mature').classList.toggle('active', profile.preferences.showMature);
+
+      const colors = ['#6c63ff','#ef4444','#22c55e','#f5c842','#ec4899'];
+      document.getElementById('color-swatches').innerHTML = colors.map(c => `
+        <div class="color-swatch ${profile.preferences.accentColor===c?'active':''}" style="background:${c}" onclick="setColor('${c}')"></div>
+      `).join('');
+
+      renderStats();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderStats() {
+      const hist = getHistory();
+      const totalMin = hist.length * 24;
+      const hours = Math.floor(totalMin / 60);
+      const mins = totalMin % 60;
+
+      const statsEl = document.getElementById('anime-stats');
+      statsEl.innerHTML = `
+        <div style="margin-bottom:20px">
+          <div style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:4px">Total Watch Time</div>
+          <div style="font-family:'Space Grotesk';font-size:1.5rem;font-weight:700">${hours}h ${mins}m</div>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:8px">Completion Rate</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, (hist.length/Math.max(1,getWatchlist().length))*100)}%"></div></div>
+        </div>
+        <div>
+          <div style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:8px">Top Genres (sample)</div>
+          <div class="genre-chart">
+            <div class="genre-bar-row"><span class="genre-bar-label">Action</span><div class="genre-bar-track"><div class="genre-bar-fill" style="width:70%"></div></div></div>
+            <div class="genre-bar-row"><span class="genre-bar-label">Fantasy</span><div class="genre-bar-track"><div class="genre-bar-fill" style="width:55%"></div></div></div>
+            <div class="genre-bar-row"><span class="genre-bar-label">Comedy</span><div class="genre-bar-track"><div class="genre-bar-fill" style="width:40%"></div></div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.saveName = function() {
+      const val = document.getElementById('display-name').value.trim();
+      if (val) {
+        const p = getProfile();
+        p.displayName = val;
+        saveProfile(p);
+        document.getElementById('profile-avatar').src = p.avatarBase64 || `https://ui-avatars.com/api/?name=${encodeURIComponent(val)}&background=6c63ff&color=fff&size=256`;
+        Toast('Name updated', 'success');
+      }
+    };
+
+    window.handleAvatar = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 200; canvas.height = 200;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 200, 200);
+          const base64 = canvas.toDataURL('image/jpeg', 0.8);
+          const p = getProfile();
+          p.avatarBase64 = base64;
+          saveProfile(p);
+          document.getElementById('profile-avatar').src = base64;
+          Toast('Avatar updated', 'success');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.setPref = function(key, val) { setPreference(key, val); Toast('Preference saved', 'success'); };
+    window.togglePref = function(key) {
+      const p = getProfile();
+      const val = !p.preferences[key];
+      setPreference(key, val);
+      document.getElementById(`toggle-${key==='autoplay'?'autoplay':'mature'}`).classList.toggle('active', val);
+      Toast('Preference saved', 'success');
+    };
+    window.setColor = function(color) {
+      setPreference('accentColor', color);
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('active', s.style.background === color));
+      Toast('Accent color updated', 'success');
+    };
+
+    window.confirmWipe = function() {
+      Modal('Clear All Data', '<p>This will permanently delete your profile, watchlist, favorites, history, and preferences. This action cannot be undone.</p>', [
+        { label: 'Cancel', class: 'btn-secondary', action: 'close' },
+        { label: 'Delete Everything', class: 'danger-btn', action: 'confirm' }
+      ]);
+      document.querySelector('[data-action="confirm"]').addEventListener('click', () => {
+        clearAllData();
+      });
+      document.querySelector('[data-action="close"]').addEventListener('click', () => {
+        document.getElementById('modal-overlay').remove();
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCommon('');
+      initProfile();
+      setupReveal();
+    });
+  </script>
+</body>
+</html>
