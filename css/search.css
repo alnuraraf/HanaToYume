@@ -1,0 +1,280 @@
+/* css/search.css */
+
+.search-page-container {
+  padding-bottom: 60px;
+}
+
+/* Prominent search input at top */
+.search-hero-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.search-input-box-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-page-input {
+  width: 100%;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px 16px 52px;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  transition: var(--transition);
+}
+
+.search-page-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 15px var(--color-accent-glow);
+  background: var(--color-bg-hover);
+}
+
+.search-page-icon-left {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  width: 20px;
+  height: 20px;
+}
+
+/* Recent searches pills */
+.recent-searches-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.recent-searches-lbl {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.recent-search-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.recent-search-pill:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent);
+}
+
+/* Page Layout: Filters + Results split */
+.search-layout {
+  display: flex;
+  gap: 32px;
+}
+
+/* Sidebar filter column */
+.search-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Results container column */
+.search-results-side {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Sidebar filter cards */
+.filter-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.filter-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--color-text-primary);
+}
+
+.filter-options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Checkboxes and radio styles */
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.checkbox-option input {
+  accent-color: var(--color-accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* Custom layout checkbox list of top 20 genres */
+.genres-grid-checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Range sliders */
+.score-range-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.score-slider {
+  width: 100%;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+/* Year text input wrapper */
+.year-inputs-row {
+  display: flex;
+  gap: 10px;
+}
+
+.year-input {
+  width: 100%;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Sort dropdown select in sidebar or bar */
+.sort-select {
+  width: 100%;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+/* Mobile search trigger and toggle */
+.filter-mobile-drawer-btn {
+  display: none;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 992px) {
+  .search-layout {
+    flex-direction: column;
+  }
+  .search-sidebar {
+    width: 100%;
+    display: none; /* hidden on mobile unless toggled open */
+  }
+  .search-sidebar.active {
+    display: flex;
+  }
+  .filter-mobile-drawer-btn {
+    display: flex;
+  }
+}
+
+/* Result count row */
+.results-info-row {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.results-info-row span {
+  color: var(--color-accent-light);
+  font-weight: 600;
+}
+
+/* Grid of cards */
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .search-results-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .search-results-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Infinite scroll loader */
+.infinite-scroll-trigger-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* Empty state suggestions list */
+.search-empty-suggestions-box {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .empty-suggestions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

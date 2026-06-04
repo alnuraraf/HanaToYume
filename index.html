@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NamiTube — Watch Anime Free in HD</title>
+  <meta name="description" content="Watch high-quality anime online free on NamiTube. Stream thousands of titles with English subtitles and dubbing with zero ads and premium features.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  
+  <!-- CSS Linkings -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/global.css">
+  
+  <style>
+    /* Landing-specific styles */
+    .landing-hero-container {
+      position: relative;
+      width: 100%;
+      height: 90vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .landing-hero-bg-slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .landing-hero-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .landing-hero-slide.active {
+      opacity: 1;
+    }
+
+    .landing-hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top, var(--color-bg-primary) 10%, rgba(10, 10, 15, 0.4) 50%, rgba(10, 10, 15, 0.7) 100%);
+      z-index: 2;
+    }
+
+    .landing-hero-content {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 24px;
+      margin-top: -40px;
+    }
+
+    .landing-hero-content h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      animation: cardFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .landing-hero-content p {
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 32px;
+      animation: cardFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .landing-ctas {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      animation: cardFadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @media (max-width: 768px) {
+      .landing-hero-content h1 {
+        font-size: 2.5rem;
+      }
+      .landing-hero-content p {
+        font-size: 1rem;
+      }
+      .landing-ctas {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .landing-ctas .btn {
+        width: 100%;
+      }
+    }
+
+    /* Three card strips */
+    .landing-features-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: -60px auto 60px auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    .landing-feature-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: var(--transition);
+    }
+
+    .landing-feature-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px var(--color-accent-glow);
+    }
+
+    .landing-feature-icon {
+      width: 40px;
+      height: 40px;
+      color: var(--color-accent-light);
+      background: var(--color-tag-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+    }
+
+    .landing-feature-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .landing-feature-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .landing-feature-desc {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 992px) {
+      .landing-features-row {
+        grid-template-columns: 1fr;
+        margin-top: 32px;
+      }
+    }
+
+    /* Trending List */
+    .trending-scroll-section {
+      margin-bottom: 80px;
+    }
+
+    .trending-scroll-container {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 10px 4px 24px 4px;
+      scrollbar-width: thin;
+    }
+
+    .trending-scroll-container > .anime-card,
+    .trending-scroll-container > .skeleton-card {
+      flex: 0 0 calc(16.66% - 17px);
+      min-width: 150px;
+    }
+
+    @media (max-width: 1200px) {
+      .trending-scroll-container > .anime-card,
+      .trending-scroll-container > .skeleton-card {
+        flex: 0 0 calc(25% - 15px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .trending-scroll-container > .anime-card,
+      .trending-scroll-container > .skeleton-card {
+        flex: 0 0 calc(50% - 10px);
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header standard placeholder -->
+  <header class="header"></header>
+
+  <!-- Main view -->
+  <main id="main-content">
+    
+    <!-- Hero Slider -->
+    <section class="landing-hero-container">
+      <div class="landing-hero-bg-slider" id="landing-hero-slides-wrapper">
+        <!-- Background elements dynamically injected -->
+        <div class="landing-hero-slide active" style="background-image: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjwxClcajSZy1q1gj_1kf_9y1J7mutn4jWfqdhlBVbFjLkViz_Z3-nuIZ11W0qOd1jlFgMFYi-g_XrpIiRbQjZd-wPwg4RWWyhbR0QLw0-ZgX5DFncVPNOxrDBouMlbdz2sLvQS65JbQaLJpQReWhjceG8Rn5cxrNusoQAXieXFcX_q_LZthCYS1AsCR30/s320/NamiTube%20Original%20banner.png'); opacity: 0.15; filter: blur(5px);"></div>
+      </div>
+      <div class="landing-hero-overlay"></div>
+      
+      <div class="landing-hero-content">
+        <h1>Watch Anime Free</h1>
+        <p>Thousands of titles in HD with English subtitles and dub.</p>
+        <div class="landing-ctas">
+          <a href="home.html" class="btn btn-primary btn-lg">
+            <i data-lucide="play" style="fill:currentColor;"></i> Explore Anime
+          </a>
+          <a href="schedule.html" class="btn btn-secondary btn-lg">
+            <i data-lucide="calendar"></i> What's Airing
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      
+      <!-- Feature Card Strip -->
+      <section class="landing-features-row reveal">
+        
+        <!-- Card 1 -->
+        <div class="landing-feature-card">
+          <div class="landing-feature-icon">
+            <i data-lucide="library" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="landing-feature-info">
+            <h3 class="landing-feature-title">Massive Collection</h3>
+            <p class="landing-feature-desc">Over 10,000 classic, current, and upcoming anime titles sourced from Jikan v4 API.</p>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="landing-feature-card">
+          <div class="landing-feature-icon">
+            <i data-lucide="tv" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="landing-feature-info">
+            <h3 class="landing-feature-title">HD Streaming</h3>
+            <p class="landing-feature-desc">Enjoy lag-free, responsive high-definition stream player panels with switchable backups.</p>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="landing-feature-card">
+          <div class="landing-feature-icon">
+            <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+          </div>
+          <div class="landing-feature-info">
+            <h3 class="landing-feature-title">Always Updated</h3>
+            <p class="landing-feature-desc">Real-time daily updates matching current broadcast season schedules straight from Japan.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Trending Section -->
+      <section class="trending-scroll-section reveal">
+        <h2 class="section-title">Trending Now</h2>
+        <div class="trending-scroll-container" id="landing-trending-container">
+          <!-- Skeletons loaded on startup -->
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Footer standard placeholder -->
+  <footer class="footer"></footer>
+
+  <!-- Core Script imports -->
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+
+  <!-- Page-specific Landing scripting -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Load Skeletons for Trending
+      const trendingContainer = document.getElementById('landing-trending-container');
+      renderSkeletonsInContainer(trendingContainer, 6, 'md');
+
+      // 2. Fetch Top 5 currently airing for Hero background cycle
+      NamiAPI.getTopAiring(1).then(res => {
+        if (res && res.data && res.data.length > 0) {
+          const topAiring = res.data.slice(0, 5);
+          
+          // Render hero background crossfading slides
+          const bgWrapper = document.getElementById('landing-hero-slides-wrapper');
+          if (bgWrapper) {
+            bgWrapper.innerHTML = topAiring.map((anime, index) => {
+              const url = anime.trailer?.images?.maximum_image_url || anime.images?.jpg?.large_image_url;
+              return `
+                <div class="landing-hero-slide ${index === 0 ? 'active' : ''}" 
+                     style="background-image: url('${url}');">
+                </div>
+              `;
+            }).join('');
+          }
+
+          // Cycle images every 8 seconds
+          let activeIndex = 0;
+          setInterval(() => {
+            const slides = document.querySelectorAll('.landing-hero-slide');
+            if (slides.length > 0) {
+              slides[activeIndex].classList.remove('active');
+              activeIndex = (activeIndex + 1) % slides.length;
+              slides[activeIndex].classList.add('active');
+            }
+          }, 8000);
+
+          // Render trending cards list below
+          if (trendingContainer) {
+            trendingContainer.innerHTML = '';
+            // Display top 6 airing anime
+            res.data.slice(0, 6).forEach(anime => {
+              const card = AnimeCard(anime, { size: 'md', showProgress: false, showActions: true });
+              trendingContainer.appendChild(card);
+            });
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }
+      }).catch(err => {
+        console.error("Failed to load landing hero / trending items", err);
+        if (trendingContainer) {
+          trendingContainer.innerHTML = `<div style="text-align:center; padding:24px; color:var(--color-text-secondary); width:100%;">Failed to load trending items. Please reload.</div>`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

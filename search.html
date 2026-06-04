@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NamiTube — Full Search Anime</title>
+  <meta name="description" content="Explore and filter thousands of anime series. Search by titles, genres, scores, years, and categories using our advanced, lightweight search interface.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  
+  <!-- CSS Linkings -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/search.css">
+</head>
+<body>
+
+  <!-- Hidden page identifier for search context initialization -->
+  <div id="search-page-identifier" style="display:none;"></div>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header standard placeholder -->
+  <header class="header"></header>
+
+  <!-- Main view container -->
+  <main id="main-content" class="search-page-container">
+    <div class="container">
+      
+      <!-- Prominent Search input row -->
+      <section class="search-hero-section reveal active">
+        <div class="search-input-box-wrapper">
+          <i data-lucide="search" class="search-page-icon-left"></i>
+          <input type="text" id="search-page-input-el" class="search-page-input" placeholder="Type anime name, studio, or keyword to search..." aria-label="Search anime database">
+        </div>
+
+        <!-- Recent searches -->
+        <div class="recent-searches-box" style="display:none;">
+          <span class="recent-searches-lbl">Recent Searches:</span>
+          <div id="recent-searches-list">
+            <!-- Pills injected via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Mobile filter toggle button -->
+      <button class="btn btn-secondary filter-mobile-drawer-btn" id="btn-toggle-filters-mobile">
+        <i data-lucide="sliders"></i> Show Filters
+      </button>
+
+      <!-- LAYOUT SPLIT FILTER/RESULTS -->
+      <div class="search-layout">
+        
+        <!-- SIDEBAR FILTERS (Left 280px) -->
+        <aside class="search-sidebar reveal">
+          <form id="search-filters-form">
+            
+            <!-- Filter 1: Sort by -->
+            <div class="filter-card" style="margin-bottom: 16px;">
+              <h3 class="filter-title">Sort Order</h3>
+              <select class="sort-select" id="filter-orderby-select">
+                <option value="score">Sort by Score (Highest)</option>
+                <option value="popularity">Sort by Popularity (Most Popular)</option>
+                <option value="title">Sort by Title (A-Z)</option>
+                <option value="episodes">Sort by Episode Count (Most)</option>
+              </select>
+            </div>
+
+            <!-- Filter 2: Type -->
+            <div class="filter-card" style="margin-bottom: 16px;">
+              <h3 class="filter-title">Format Type</h3>
+              <div class="filter-options-stack">
+                <label class="checkbox-option">
+                  <input type="checkbox" name="type" value="tv">
+                  <span>TV Series</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="type" value="movie">
+                  <span>Movie</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="type" value="ova">
+                  <span>OVA</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="type" value="ona">
+                  <span>ONA</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="type" value="special">
+                  <span>Special</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Filter 3: Status -->
+            <div class="filter-card" style="margin-bottom: 16px;">
+              <h3 class="filter-title">Airing Status</h3>
+              <div class="filter-options-stack">
+                <label class="checkbox-option">
+                  <input type="checkbox" name="status" value="airing">
+                  <span>Currently Airing</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="status" value="complete">
+                  <span>Completed</span>
+                </label>
+                <label class="checkbox-option">
+                  <input type="checkbox" name="status" value="upcoming">
+                  <span>Upcoming (TBA)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Filter 4: Score Slider -->
+            <div class="filter-card" style="margin-bottom: 16px;">
+              <h3 class="filter-title" style="display:flex; justify-content:space-between;">
+                <span>Minimum Rating</span>
+                <span id="score-slider-val-label" style="color:var(--color-gold); font-weight:700;">Any Score</span>
+              </h3>
+              <div class="score-range-wrapper">
+                <input type="range" id="filter-score-slider" class="score-slider" min="1" max="10" step="1" value="1" aria-label="Minimum rating score">
+                <div class="range-labels">
+                  <span>★ 1</span>
+                  <span>★ 10</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filter 5: Year input -->
+            <div class="filter-card" style="margin-bottom: 16px;">
+              <h3 class="filter-title">Release Year</h3>
+              <div class="year-inputs-row">
+                <input type="text" id="filter-year-input" class="year-input" placeholder="e.g. 2024" maxlength="4" aria-label="Release year">
+              </div>
+            </div>
+
+            <!-- Filter 6: Genres List checkboxes checklist -->
+            <div class="filter-card">
+              <h3 class="filter-title">Genres</h3>
+              <div class="genres-grid-checklist" id="genres-checklist-container">
+                <!-- Checklist injected via search.js mapping top genres -->
+              </div>
+            </div>
+
+          </form>
+        </aside>
+
+        <!-- RESULTS SECTION (Right Grow) -->
+        <section class="search-results-side">
+          
+          <!-- Query metadata counter -->
+          <div class="results-info-row" id="search-results-count-lbl">
+            Showing results...
+          </div>
+
+          <!-- Results Card grid -->
+          <div class="search-results-grid" id="search-results-grid-container">
+            <!-- Injected via infinite scroll loads -->
+          </div>
+
+          <!-- Loading indicator bar -->
+          <div class="infinite-scroll-trigger-bar" id="infinite-scroll-loader-bar" style="display:none;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="skeleton-shimmer" style="width:20px; height:20px; border-radius:50%;"></span>
+              <span>Loading more results...</span>
+            </div>
+          </div>
+
+          <!-- Observer bottom line detector -->
+          <div id="infinite-scroll-trigger-detector" style="height:10px;"></div>
+
+        </section>
+
+      </div> <!-- /layout split -->
+
+    </div>
+  </main>
+
+  <!-- Footer standard placeholder -->
+  <footer class="footer"></footer>
+
+  <!-- Core Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/search.js"></script>
+</body>
+</html>

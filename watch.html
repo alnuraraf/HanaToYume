@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NamiTube — Stream Anime</title>
+  <meta name="description" content="Watch high-quality, free anime streams. Toggle between multiple server choices, subtitles and dubbing files with live automated progress tracking.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  
+  <!-- CSS Linkings -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/watch.css">
+</head>
+<body>
+
+  <!-- Top accent-colored scroll progress bar -->
+  <div class="watch-scroll-progress" id="watch-top-scroll-progress-bar"></div>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header standard placeholder -->
+  <header class="header"></header>
+
+  <!-- Main content wrapper -->
+  <main id="main-content" class="watch-container">
+    <div class="container">
+      
+      <!-- PLAYER REGION -->
+      <section class="player-outer-wrapper">
+        
+        <!-- Breadcrumbs -->
+        <div class="player-breadcrumbs" id="player-breadcrumbs-element">
+          <!-- Injected via player manager -->
+        </div>
+
+        <!-- 16:9 Player container box -->
+        <div class="video-player-container" id="player-iframe-container">
+          <!-- Iframe loaded via PlayerManager -->
+          <div style="width: 100%; height: 100%; display:flex; align-items:center; justify-content:center;" class="skeleton-shimmer">
+            <span style="font-weight: 600; color:var(--color-text-secondary);">Initializing Streaming Player...</span>
+          </div>
+        </div>
+
+        <!-- Player controls action bar -->
+        <div class="player-controls-row">
+          
+          <!-- Prev / Next Episode -->
+          <div class="controls-group">
+            <button class="btn btn-secondary" id="btn-prev-ep" onclick="PlayerManager.prevEpisode()" aria-label="Previous episode">
+              <i data-lucide="chevrons-left"></i> <span>Prev</span>
+            </button>
+            <button class="btn btn-secondary" id="btn-next-ep" onclick="PlayerManager.nextEpisode()" aria-label="Next episode">
+              <span>Next</span> <i data-lucide="chevrons-right"></i>
+            </button>
+          </div>
+
+          <!-- SUB/DUB toggle -->
+          <div class="controls-group">
+            <span class="controls-label">Language:</span>
+            <button class="btn btn-secondary" id="btn-lang-sub" onclick="PlayerManager.switchLanguage('sub')">SUB</button>
+            <button class="btn btn-secondary" id="btn-lang-dub" onclick="PlayerManager.switchLanguage('dub')">DUB</button>
+          </div>
+
+          <!-- Server switcher (Backup) -->
+          <div class="controls-group">
+            <span class="controls-label">Server:</span>
+            <button class="btn btn-secondary" id="btn-server-primary" onclick="PlayerManager.switchServer('primary')">Server 1 (Primary)</button>
+            <button class="btn btn-secondary" id="btn-server-backup" onclick="PlayerManager.switchServer('backup')">Server 2 (Backup)</button>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- DETAIL LAYOUT SPLIT -->
+      <div class="watch-layout">
+        
+        <!-- LEFT COLUMN (65%) -->
+        <div class="watch-main-col">
+          
+          <!-- Episode Details card -->
+          <div class="episode-details-box">
+            <div class="episode-number-badge" id="details-ep-number-badge">EPISODE N</div>
+            <h1 class="episode-watch-title" id="details-ep-title-val">Loading Episode details...</h1>
+            <p class="episode-watch-desc" id="details-ep-desc-val">Fetching description from Jikan servers...</p>
+          </div>
+
+          <!-- Scrollable thumbnail episode strip list -->
+          <div class="episode-navigation-section">
+            <h2 class="episode-nav-title">Select Episode</h2>
+            <div id="episodes-scroller-strip-wrapper">
+              <!-- Reusable EpisodeStrip component injected here -->
+            </div>
+          </div>
+
+          <!-- Comments placeholder card (GTA) -->
+          <div class="comments-placeholder-card">
+            <i data-lucide="message-square" class="comments-icon"></i>
+            <h2 class="comments-title">Join the Discussion</h2>
+            <p class="comments-text">Share your thoughts on this episode with thousands of other fans on our active Discord community server.</p>
+            <a href="#" class="btn btn-primary">
+              <i data-lucide="external-link"></i> Join Our Discord
+            </a>
+          </div>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR COLUMN (35%) -->
+        <aside class="watch-sidebar-col">
+          
+          <!-- Compact anime info card -->
+          <div class="compact-anime-card">
+            <img id="compact-card-poster" src="" alt="Poster" class="compact-poster-img">
+            <div class="compact-details">
+              <h3 class="compact-title" id="compact-card-title">Anime Title</h3>
+              <div class="compact-meta" id="compact-card-meta">Type • Rating</div>
+              <div class="compact-genres" id="compact-card-genres">Genres list</div>
+            </div>
+          </div>
+
+          <!-- Broadcast Schedule time box -->
+          <div class="broadcast-schedule-card">
+            <span class="broadcast-card-title">Broadcast Schedule</span>
+            <div class="broadcast-time-val" id="broadcast-schedule-time">TBA</div>
+            <div class="broadcast-status-badge" id="broadcast-schedule-status-badge">Airing</div>
+          </div>
+
+          <!-- Recommendations Grid Inside watch sidebar -->
+          <div>
+            <h3 class="section-title" style="font-size:1.15rem; margin-bottom:16px;">Recommended Shows</h3>
+            <div class="watch-recommendations-list" id="watch-recommendations-list-wrapper">
+              <!-- Recommended lists (4 cards) -->
+            </div>
+          </div>
+
+        </aside>
+
+      </div> <!-- /Split layout -->
+
+    </div>
+  </main>
+
+  <!-- Footer standard placeholder -->
+  <footer class="footer"></footer>
+
+  <!-- Core Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/player.js"></script>
+
+  <!-- Page details scripts -->
+  <script>
+    let animeData = null;
+    let episodesList = [];
+    let malId = null;
+    let initialEp = 1;
+    let initialLang = 'sub';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      malId = params.get('id');
+      initialEp = params.get('ep') || 1;
+      initialLang = params.get('lang') || 'sub';
+
+      if (!malId) {
+        window.location.href = 'home.html';
+        return;
+      }
+
+      // Initialize top scroll progress bar
+      window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        const bar = document.getElementById('watch-top-scroll-progress-bar');
+        if (bar) bar.style.width = scrolled + "%";
+      });
+
+      loadAnimeDataAndPlayer();
+    });
+
+    async function loadAnimeDataAndPlayer() {
+      try {
+        const dataRes = await NamiAPI.getAnimeDetails(malId);
+        animeData = dataRes.data;
+
+        if (!animeData) {
+          Toast("Anime streaming resource not found.", "error");
+          setTimeout(() => window.location.href = 'home.html', 2000);
+          return;
+        }
+
+        // Initialize PlayerManager
+        PlayerManager.init({
+          malId: malId,
+          ep: initialEp,
+          lang: initialLang,
+          totalEpisodes: animeData.episodes,
+          title: animeData.title,
+          poster: animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url
+        });
+
+        // Dynamic HTML document page title
+        document.title = `Watch ${animeData.title} Episode ${initialEp} ${initialLang.toUpperCase()} Online Free — NamiTube`;
+
+        // Load details sections
+        renderSidebarCompactCard();
+        renderSidebarBroadcast();
+        loadEpisodesListAndThumbStrip();
+        loadSidebarRecommendations();
+
+        // Listen for internal episode switch triggers
+        document.addEventListener('episodeSwitched', (e) => {
+          document.title = `Watch ${animeData.title} Episode ${e.detail.episode} ${PlayerManager.currentLang.toUpperCase()} Online Free — NamiTube`;
+          updateEpisodeDetailsCard(e.detail.episode);
+          
+          // Re-render thumbnail strip with active highlighting
+          renderEpisodesThumbnailStrip(e.detail.episode);
+        });
+
+      } catch (err) {
+        console.error("Failed to load stream details", err);
+        Toast("Streaming server error, retrying...", "error");
+      }
+    }
+
+    function renderSidebarCompactCard() {
+      const poster = document.getElementById('compact-card-poster');
+      const posterUrl = animeData.images?.jpg?.image_url || animeData.images?.jpg?.large_image_url;
+      if (poster && posterUrl) {
+        poster.src = posterUrl;
+        poster.alt = animeData.title;
+      }
+
+      setElementText('compact-card-title', animeData.title);
+      setElementText('compact-card-meta', `${animeData.type || 'TV'} • ★ ${animeData.score ? animeData.score : 'N/A'}`);
+      
+      const genStr = animeData.genres ? animeData.genres.map(g => g.name).slice(0, 3).join(', ') : 'TBA';
+      setElementText('compact-card-genres', genStr);
+    }
+
+    function renderSidebarBroadcast() {
+      const bTime = document.getElementById('broadcast-schedule-time');
+      const bBadge = document.getElementById('broadcast-schedule-status-badge');
+
+      if (animeData.status === 'Currently Airing' && animeData.broadcast?.string) {
+        if (bTime) bTime.textContent = animeData.broadcast.string;
+        if (bBadge) {
+          bBadge.textContent = 'Currently Airing';
+          bBadge.className = 'broadcast-status-badge';
+        }
+      } else {
+        if (bTime) bTime.textContent = 'Completed';
+        if (bBadge) {
+          bBadge.textContent = 'Finished Airing';
+          bBadge.className = 'broadcast-status-badge completed';
+        }
+      }
+    }
+
+    async function loadEpisodesListAndThumbStrip() {
+      const stripWrapper = document.getElementById('episodes-scroller-strip-wrapper');
+      if (!stripWrapper) return;
+
+      try {
+        // Query first page of episodes from Jikan
+        const response = await NamiAPI.getAnimeEpisodes(malId, 1);
+        episodesList = response.data || [];
+
+        if (episodesList.length === 0) {
+          const fallbackCount = animeData.episodes || 12;
+          episodesList = Array.from({ length: fallbackCount }, (_, index) => ({
+            episode_id: index + 1,
+            title: `Episode ${index + 1}`
+          }));
+        }
+
+        renderEpisodesThumbnailStrip(PlayerManager.currentEp);
+        updateEpisodeDetailsCard(PlayerManager.currentEp);
+
+      } catch (err) {
+        console.error("Failed to load episode strips, loading fallback list", err);
+        const fallbackCount = animeData.episodes || 12;
+        episodesList = Array.from({ length: fallbackCount }, (_, index) => ({
+          episode_id: index + 1,
+          title: `Episode ${index + 1}`
+        }));
+        renderEpisodesThumbnailStrip(PlayerManager.currentEp);
+        updateEpisodeDetailsCard(PlayerManager.currentEp);
+      }
+    }
+
+    function renderEpisodesThumbnailStrip(currentEpNum) {
+      const stripWrapper = document.getElementById('episodes-scroller-strip-wrapper');
+      if (!stripWrapper) return;
+
+      stripWrapper.innerHTML = '';
+      const strip = EpisodeStrip(episodesList, currentEpNum, (num) => {
+        PlayerManager.goToEpisode(num);
+      });
+      stripWrapper.appendChild(strip);
+    }
+
+    function updateEpisodeDetailsCard(epNum) {
+      const item = episodesList.find(e => Number(e.episode_id) === Number(epNum));
+      const title = item ? item.title : `Episode ${epNum}`;
+      
+      setElementText('details-ep-number-badge', `EPISODE ${epNum}`);
+      setElementText('details-ep-title-val', title);
+
+      // In Jikan, some episode objects have synopsis or summary.
+      // If not, we fall back to a nicely looking default string.
+      const descVal = document.getElementById('details-ep-desc-val');
+      if (descVal) {
+        descVal.textContent = item?.synopsis || `No description available for Episode ${epNum}. Enjoy high-speed, lag-free streaming on NamiTube with subtitle tracks.`;
+      }
+    }
+
+    async function loadSidebarRecommendations() {
+      const recList = document.getElementById('watch-recommendations-list-wrapper');
+      if (!recList) return;
+
+      try {
+        const response = await NamiAPI.getAnimeRecommendations(malId);
+        if (response && response.data && response.data.length > 0) {
+          recList.innerHTML = response.data.slice(0, 4).map(rec => {
+            const r = rec.entry;
+            return `
+              <a href="anime.html?id=${r.mal_id}" class="watch-rec-card">
+                <img src="${r.images?.jpg?.image_url}" alt="${r.title}" class="watch-rec-img" loading="lazy">
+                <div class="watch-rec-info">
+                  <h4 class="watch-rec-title" title="${r.title}">${r.title}</h4>
+                  <div class="watch-rec-score">
+                    <i data-lucide="star" style="width:10px; height:10px; fill:var(--color-gold); color:var(--color-gold);"></i>
+                    <span>Score Rating</span>
+                  </div>
+                </div>
+              </a>
+            `;
+          }).join('');
+          if (window.lucide) window.lucide.createIcons();
+        } else {
+          recList.innerHTML = `<div style="font-size:0.8rem; color:var(--color-text-muted);">No recommendations found.</div>`;
+        }
+      } catch (err) {
+        console.error("Failed to load recommendations", err);
+      }
+    }
+
+    function setElementText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+  </script>
+</body>
+</html>
