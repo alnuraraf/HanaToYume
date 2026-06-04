@@ -1,0 +1,261 @@
+/* css/donate.css */
+
+.donate-container {
+  padding-bottom: 60px;
+}
+
+/* Hero section */
+.donate-hero {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 48px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.donate-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.donate-hero p {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Tier cards grid */
+.donate-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 56px;
+}
+
+@media (max-width: 992px) {
+  .donate-tiers-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.donate-tier-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.donate-tier-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 25px var(--color-accent-glow);
+  transform: translateY(-4px);
+}
+
+.donate-tier-card.featured {
+  border-color: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, rgba(108, 99, 255, 0.05) 100%);
+}
+
+.donate-tier-badge {
+  position: absolute;
+  top: -12px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.donate-tier-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-accent-light);
+}
+
+.donate-tier-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.donate-tier-price {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--color-text-primary);
+}
+
+.donate-tier-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.donate-tier-card .btn {
+  width: 100%;
+}
+
+/* Info segments splits */
+.donate-info-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 56px;
+}
+
+@media (max-width: 768px) {
+  .donate-info-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.donate-info-panel {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+}
+
+.donate-info-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+}
+
+.donate-perks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.donate-perk-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.donate-perk-item i {
+  color: var(--color-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Supporters wall names grid */
+.supporters-wall {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  margin-bottom: 56px;
+}
+
+.supporters-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.supporter-pill {
+  padding: 6px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.supporter-pill.legendary {
+  background: rgba(245, 200, 66, 0.1);
+  color: var(--color-gold);
+  border-color: rgba(245, 200, 66, 0.3);
+}
+
+/* Accordion FAQ */
+.faq-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 28px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faq-item {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.faq-trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  font-weight: 600;
+  text-align: left;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.faq-trigger:hover {
+  background: var(--color-bg-hover);
+}
+
+.faq-trigger i {
+  color: var(--color-text-muted);
+  transition: var(--transition);
+}
+
+.faq-item.active .faq-trigger i {
+  transform: rotate(180deg);
+  color: var(--color-accent);
+}
+
+.faq-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background: rgba(10, 10, 15, 0.2);
+}
+
+.faq-content-inner {
+  padding: 16px 24px 24px 24px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}

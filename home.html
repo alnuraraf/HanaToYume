@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NamiTube — Next-Gen Anime Hub</title>
+  <meta name="description" content="Discover, track, and stream the latest anime series. Your premium anime companion with custom watchlists, airing countdowns, and high-definition video player integration.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  
+  <!-- CSS Linkings -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header standard placeholder -->
+  <header class="header"></header>
+
+  <!-- Main view -->
+  <main id="main-content" class="home-container">
+    <div class="container">
+      
+      <!-- Spotlight Slider Section -->
+      <section id="featured-spotlight-wrapper" class="reveal">
+        <!-- Injected via JS -->
+        <div style="height: 480px; width: 100%; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-bg-card);" class="skeleton-shimmer"></div>
+      </section>
+
+      <!-- Quick Action Genre Tabs Filter -->
+      <section class="home-section reveal">
+        <h2 class="section-title">Explore by Genre</h2>
+        <div class="genre-filter-tabs" id="quick-genre-tabs-container">
+          <!-- IDs map to Jikan: Shonen(27), Action(1), Romance(22), Isekai(62), Seinen(41), Horror(14), Fantasy(10), Comedy(4) -->
+          <button class="genre-tab active" data-genre="all">All Genres</button>
+          <button class="genre-tab" data-genre="27">Shonen</button>
+          <button class="genre-tab" data-genre="1">Action</button>
+          <button class="genre-tab" data-genre="22">Romance</button>
+          <button class="genre-tab" data-genre="62">Isekai</button>
+          <button class="genre-tab" data-genre="41">Seinen</button>
+          <button class="genre-tab" data-genre="14">Horror</button>
+          <button class="genre-tab" data-genre="10">Fantasy</button>
+          <button class="genre-tab" data-genre="4">Comedy</button>
+        </div>
+        <div class="card-grid" id="genre-filtered-results-grid" style="display: none; margin-top: 10px;">
+          <!-- Filtered items injected here -->
+        </div>
+      </section>
+
+      <!-- Grid wrapper logic for standard groups (if no custom genre active) -->
+      <div id="standard-home-sections">
+        
+        <!-- Trending section -->
+        <section class="home-section reveal">
+          <div class="home-section-header">
+            <h2 class="section-title">Trending Anime</h2>
+            <div class="scroll-controls">
+              <button class="scroll-control-btn btn-prev" data-target="scroll-trending" aria-label="Scroll left">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <button class="scroll-control-btn btn-next" data-target="scroll-trending" aria-label="Scroll right">
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-scroll-row" id="scroll-trending">
+            <!-- Skeletons loaded on startup -->
+          </div>
+        </section>
+
+        <!-- New Episodes Today -->
+        <section class="home-section reveal">
+          <div class="home-section-header">
+            <h2 class="section-title">New Episodes Today</h2>
+          </div>
+          <div class="card-grid" id="grid-episodes-today">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+
+        <!-- This Season -->
+        <section class="home-section reveal">
+          <div class="home-section-header">
+            <h2 class="section-title">This Season</h2>
+          </div>
+          <div class="card-grid" id="grid-current-season">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+
+        <!-- Top Rated All Time -->
+        <section class="home-section reveal">
+          <div class="home-section-header">
+            <h2 class="section-title">Top Rated Popular</h2>
+            <div class="scroll-controls">
+              <button class="scroll-control-btn btn-prev" data-target="scroll-top-rated" aria-label="Scroll left">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <button class="scroll-control-btn btn-next" data-target="scroll-top-rated" aria-label="Scroll right">
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-scroll-row" id="scroll-top-rated">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+
+        <!-- Upcoming Seasons -->
+        <section class="home-section reveal">
+          <div class="home-section-header">
+            <h2 class="section-title">Upcoming Seasons</h2>
+          </div>
+          <div class="card-grid" id="grid-upcoming">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+
+      </div> <!-- /standard-home-sections -->
+
+    </div>
+  </main>
+
+  <!-- Footer standard placeholder -->
+  <footer class="footer"></footer>
+
+  <!-- Core Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+
+  <!-- Page Logic script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Setup horizontal scroll sliders buttons controls
+      setupScrollControls();
+
+      // 2. Fetch and render Spotlight slider
+      const spotlightWrapper = document.getElementById('featured-spotlight-wrapper');
+      
+      // Fetch currently airing for spotlight & trending
+      NamiAPI.getTopAiring(1).then(res => {
+        if (res && res.data && res.data.length > 0) {
+          // spotlight (3 items)
+          const spotlightItems = res.data.slice(0, 4);
+          const slider = HeroSpotlight(spotlightItems, false);
+          spotlightWrapper.innerHTML = '';
+          spotlightWrapper.appendChild(slider);
+
+          // trending row (8 items)
+          const trendingScroll = document.getElementById('scroll-trending');
+          if (trendingScroll) {
+            trendingScroll.innerHTML = '';
+            res.data.slice(0, 8).forEach(anime => {
+              const card = AnimeCard(anime);
+              trendingScroll.appendChild(card);
+            });
+          }
+          if (window.lucide) window.lucide.createIcons();
+        }
+      }).catch(err => {
+        console.error("Failed to load Spotlight/Trending row", err);
+      });
+
+      // 3. New Episodes Today (using current weekday filter schedules)
+      const currentDay = getCurrentWeekdayName();
+      const epTodayGrid = document.getElementById('grid-episodes-today');
+      if (epTodayGrid) {
+        renderSkeletonsInContainer(epTodayGrid, 6, 'md');
+        NamiAPI.getSchedule(currentDay).then(res => {
+          if (res && res.data && res.data.length > 0) {
+            epTodayGrid.innerHTML = '';
+            // Display top 6 airing items for today
+            res.data.slice(0, 6).forEach(anime => {
+              const card = AnimeCard(anime);
+              epTodayGrid.appendChild(card);
+            });
+            if (window.lucide) window.lucide.createIcons();
+          } else {
+            epTodayGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--color-text-secondary);">No episodes scheduled for release today.</div>`;
+          }
+        }).catch(err => console.error("Failed to load episodes today", err));
+      }
+
+      // 4. This Season
+      const curSeasonGrid = document.getElementById('grid-current-season');
+      if (curSeasonGrid) {
+        renderSkeletonsInContainer(curSeasonGrid, 12, 'md');
+        NamiAPI.getCurrentSeason(1).then(res => {
+          if (res && res.data && res.data.length > 0) {
+            curSeasonGrid.innerHTML = '';
+            res.data.slice(0, 12).forEach(anime => {
+              const card = AnimeCard(anime);
+              curSeasonGrid.appendChild(card);
+            });
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }).catch(err => console.error("Failed to load current season", err));
+      }
+
+      // 5. Top Rated Popular All Time
+      const topRatedScroll = document.getElementById('scroll-top-rated');
+      if (topRatedScroll) {
+        renderSkeletonsInContainer(topRatedScroll, 10, 'md');
+        NamiAPI.getTopPopular(1).then(res => {
+          if (res && res.data && res.data.length > 0) {
+            topRatedScroll.innerHTML = '';
+            res.data.slice(0, 10).forEach(anime => {
+              const card = AnimeCard(anime);
+              topRatedScroll.appendChild(card);
+            });
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }).catch(err => console.error("Failed to load top popular row", err));
+      }
+
+      // 6. Upcoming
+      const upcomingGrid = document.getElementById('grid-upcoming');
+      if (upcomingGrid) {
+        renderSkeletonsInContainer(upcomingGrid, 8, 'md');
+        NamiAPI.getUpcoming(1).then(res => {
+          if (res && res.data && res.data.length > 0) {
+            upcomingGrid.innerHTML = '';
+            res.data.slice(0, 8).forEach(anime => {
+              const card = AnimeCard(anime);
+              upcomingGrid.appendChild(card);
+            });
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }).catch(err => console.error("Failed to load upcoming", err));
+      }
+
+      // 7. Genre quick action filters tabs
+      setupGenreTabs();
+    });
+
+    function setupScrollControls() {
+      const btns = document.querySelectorAll('.scroll-control-btn');
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const targetRow = document.getElementById(targetId);
+          if (targetRow) {
+            const scrollDistance = targetRow.clientWidth * 0.75;
+            const isNext = btn.classList.contains('btn-next');
+            targetRow.scrollBy({
+              left: isNext ? scrollDistance : -scrollDistance,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    }
+
+    function setupGenreTabs() {
+      const tabs = document.querySelectorAll('.genre-tab');
+      const standardSections = document.getElementById('standard-home-sections');
+      const filterGrid = document.getElementById('genre-filtered-results-grid');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          const genreId = tab.getAttribute('data-genre');
+          
+          if (genreId === 'all') {
+            // Restore standard layout panels
+            standardSections.style.display = 'block';
+            filterGrid.style.display = 'none';
+          } else {
+            // Fetch genre-specific results and show in filtered grid
+            standardSections.style.display = 'none';
+            filterGrid.style.display = 'grid';
+            
+            renderSkeletonsInContainer(filterGrid, 12, 'md');
+
+            NamiAPI.searchAnime('', 1, { genres: genreId, order_by: 'score', sort: 'desc' }).then(res => {
+              if (res && res.data && res.data.length > 0) {
+                filterGrid.innerHTML = '';
+                res.data.slice(0, 12).forEach(anime => {
+                  const card = AnimeCard(anime);
+                  filterGrid.appendChild(card);
+                });
+                if (window.lucide) window.lucide.createIcons();
+              } else {
+                filterGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--color-text-secondary); padding:40px 0;">No anime found in this genre.</div>`;
+              }
+            }).catch(err => {
+              console.error("Failed to load genre items", err);
+              filterGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--color-text-secondary); padding:40px 0;">Failed to fetch items. Please retry.</div>`;
+            });
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

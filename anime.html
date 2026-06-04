@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NamiTube — Anime Details</title>
+  <meta name="description" content="View detailed descriptions, trailers, episodes list, character details, staff rolls, reviews, and related recommendations of your favorite anime series.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  
+  <!-- CSS Linkings -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/anime.css">
+</head>
+<body>
+
+  <!-- Hidden page identifier for router/page-context initialization -->
+  <div id="anime-detail-page-identifier" style="display:none;"></div>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header standard placeholder -->
+  <header class="header"></header>
+
+  <!-- Main view -->
+  <main id="main-content" class="anime-detail-container">
+    <div class="container">
+      
+      <!-- Hero Banner image -->
+      <section class="anime-hero-banner" id="anime-details-banner-el">
+        <div class="anime-hero-overlay"></div>
+      </section>
+
+      <!-- Main Columns layout -->
+      <div class="anime-layout">
+        
+        <!-- LEFT COLUMN (70%) -->
+        <div class="anime-main-col">
+          
+          <!-- Title & Alt names -->
+          <div class="anime-title-section">
+            <h1 class="anime-title" id="anime-title-val">Loading Anime Title...</h1>
+            <p class="anime-alt-titles" id="anime-alt-titles-val"></p>
+          </div>
+
+          <!-- Meta badges row -->
+          <div class="anime-meta-row" id="anime-meta-row-val">
+            <!-- Loading meta items -->
+          </div>
+
+          <!-- Genre pills row -->
+          <div class="anime-genres-row" id="anime-genres-row-val">
+            <!-- Loading genre tags -->
+          </div>
+
+          <!-- Synopsis Expandable -->
+          <div class="synopsis-box">
+            <h2 class="section-title">Synopsis</h2>
+            <p class="synopsis-text truncated" id="anime-synopsis-val">Fetching description...</p>
+            <button class="synopsis-toggle-btn" id="btn-synopsis-toggle" style="display:none;">
+              <span>Read More</span> <i data-lucide="chevron-down" style="width:14px; height:14px;"></i>
+            </button>
+          </div>
+
+          <!-- YouTube Trailer embed -->
+          <div id="anime-trailer-section" style="display:none;">
+            <h2 class="section-title">Official Trailer</h2>
+            <div class="video-embed-container" id="anime-trailer-container">
+              <!-- Iframe injected -->
+            </div>
+          </div>
+
+          <!-- Episode grid container (placed inside main column, below trailers) -->
+          <section class="episodes-section" id="episodes-container-block">
+            <div class="episodes-header">
+              <h2 class="episodes-title">
+                <i data-lucide="play-circle" style="color:var(--color-accent);"></i>
+                <span>Episodes List</span>
+              </h2>
+              <div class="episode-filter-toggle">
+                <button class="toggle-btn active" id="toggle-sub-ep" onclick="toggleEpLanguage('sub')">SUB</button>
+                <button class="toggle-btn" id="toggle-dub-ep" onclick="toggleEpLanguage('dub')">DUB</button>
+              </div>
+            </div>
+            
+            <div class="episodes-grid" id="anime-episodes-grid-el">
+              <!-- Episodes button list -->
+            </div>
+
+            <!-- Pagination list -->
+            <div class="episodes-pagination" id="anime-episodes-pagination-row"></div>
+          </section>
+
+          <!-- Characters & Voice Actors -->
+          <section class="reveal">
+            <h2 class="section-title">Characters & Voice Actors</h2>
+            <div class="characters-scroll" id="anime-characters-container">
+              <!-- Character cards list -->
+            </div>
+          </section>
+
+          <!-- Staff Row -->
+          <section class="reveal">
+            <h2 class="section-title">Production Staff</h2>
+            <div class="staff-scroll" id="anime-staff-container">
+              <!-- Staff list pills -->
+            </div>
+          </section>
+
+          <!-- Recommendations Grid -->
+          <section class="reveal">
+            <h2 class="section-title">You May Also Like</h2>
+            <div class="recommendations-grid" id="anime-recommendations-container">
+              <!-- Card grid list (6 items) -->
+            </div>
+          </section>
+
+          <!-- Reviews section -->
+          <section class="reviews-section reveal">
+            <h2 class="section-title">User Reviews</h2>
+            <div id="anime-reviews-container">
+              <!-- Top 3 reviews lists -->
+            </div>
+          </section>
+
+        </div> <!-- /LEFT COLUMN -->
+
+        <!-- RIGHT SIDEBAR (30%) -->
+        <aside class="anime-sidebar-col">
+          <div class="sidebar-wrapper">
+            
+            <!-- Poster -->
+            <div class="anime-sidebar-poster">
+              <img id="anime-sidebar-poster-img" src="" alt="Anime Poster">
+            </div>
+
+            <!-- Action buttons panel -->
+            <div class="sidebar-actions-panel">
+              <button class="btn btn-primary" id="btn-sidebar-toggle-watchlist">
+                <i data-lucide="bookmark"></i> <span>Add to Watchlist</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-sidebar-toggle-favorite">
+                <i data-lucide="heart"></i> <span>Add to Favourites</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-sidebar-toggle-watching">
+                <i data-lucide="play-circle"></i> <span>Mark as Watching</span>
+              </button>
+            </div>
+
+            <!-- User Rating Stars Selector -->
+            <div class="user-rating-box">
+              <span class="user-rating-box-title">Your Personal Rating</span>
+              <div id="user-rating-stars-wrapper"></div>
+            </div>
+
+            <!-- CSS-Only Rating Breakdown bar graph -->
+            <div class="sidebar-stats-card">
+              <span class="user-rating-box-title">Score Breakdown</span>
+              <div class="stats-breakdown" id="score-breakdown-bar-chart">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <!-- Anime detailed table details -->
+            <div class="sidebar-info-table">
+              <h3 class="info-table-title">Information</h3>
+              <div class="info-table-list" id="anime-details-table-list">
+                <!-- Info row entries injected -->
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+      </div> <!-- /Main Columns layout -->
+
+    </div>
+  </main>
+
+  <!-- Footer standard placeholder -->
+  <footer class="footer"></footer>
+
+  <!-- Core Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+
+  <!-- Page details scripts -->
+  <script>
+    let animeData = null;
+    let animeEpisodes = [];
+    let currentLanguage = 'sub';
+    let currentEpPage = 1;
+    let malId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      malId = params.get('id');
+
+      if (!malId) {
+        window.location.href = 'home.html';
+        return;
+      }
+
+      loadAnimeDetails();
+    });
+
+    async function loadAnimeDetails() {
+      try {
+        // Show loaders...
+        const dataRes = await NamiAPI.getAnimeDetails(malId);
+        animeData = dataRes.data;
+
+        if (!animeData) {
+          Toast("Anime details not found.", "error");
+          setTimeout(() => window.location.href = 'home.html', 2000);
+          return;
+        }
+
+        // Dynamically set Page Metadata for SEO
+        document.title = `${animeData.title} — Stream Online Free | NamiTube`;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc && animeData.synopsis) {
+          metaDesc.setAttribute('content', truncateText(animeData.synopsis, 150));
+        }
+
+        renderHeroSection();
+        renderLeftColumn();
+        renderRightColumn();
+        
+        // Load asynchronous non-blocking resources
+        loadEpisodes();
+        loadCharacters();
+        loadStaff();
+        loadRecommendations();
+        loadReviews();
+
+      } catch (err) {
+        console.error("Failed to load anime detailed parameters", err);
+        Toast("Failed to load anime details. Retrying...", "error");
+      }
+    }
+
+    function renderHeroSection() {
+      const banner = document.getElementById('anime-details-banner-el');
+      const bannerUrl = animeData.trailer?.images?.maximum_image_url || animeData.images?.jpg?.large_image_url;
+      if (banner && bannerUrl) {
+        banner.style.backgroundImage = `linear-gradient(to top, var(--color-bg-primary) 10%, rgba(10, 10, 15, 0.4) 60%), url('${bannerUrl}')`;
+      }
+    }
+
+    function renderLeftColumn() {
+      // 1. Title & Alt names
+      setElementText('anime-title-val', animeData.title);
+      
+      const alts = [animeData.title_english, animeData.title_japanese].filter(Boolean).join(' • ');
+      setElementText('anime-alt-titles-val', alts);
+
+      // 2. Meta row
+      const metaRow = document.getElementById('anime-meta-row-val');
+      if (metaRow) {
+        metaRow.innerHTML = `
+          <div class="anime-meta-item">
+            <i data-lucide="star" style="fill:var(--color-gold); color:var(--color-gold);"></i>
+            <span>${animeData.score ? animeData.score + ' Score' : 'N/A'}</span>
+          </div>
+          <div class="anime-meta-item">
+            <i data-lucide="award"></i>
+            <span>Rank #${animeData.rank || 'N/A'}</span>
+          </div>
+          <div class="anime-meta-item">
+            <i data-lucide="trending-up"></i>
+            <span>Popularity #${animeData.popularity || 'N/A'}</span>
+          </div>
+          <div class="anime-meta-item">
+            <i data-lucide="activity"></i>
+            <span>${animeData.status || 'TBA'}</span>
+          </div>
+          <div class="anime-meta-item">
+            <i data-lucide="tv"></i>
+            <span>${animeData.episodes ? animeData.episodes + ' Eps' : '?' + ' Eps'}</span>
+          </div>
+          <div class="anime-meta-item">
+            <i data-lucide="clock"></i>
+            <span>${animeData.duration || 'N/A'}</span>
+          </div>
+        `;
+      }
+
+      // 3. Genres tags list
+      const genresRow = document.getElementById('anime-genres-row-val');
+      if (genresRow && animeData.genres) {
+        genresRow.innerHTML = animeData.genres.map(g => `
+          <span class="genre-pill" onclick="window.location.href='search.html?genre=${g.mal_id}'">${g.name}</span>
+        `).join('');
+      }
+
+      // 4. Synopsis expandable read more
+      const synVal = document.getElementById('anime-synopsis-val');
+      const synBtn = document.getElementById('btn-synopsis-toggle');
+      if (synVal && animeData.synopsis) {
+        synVal.textContent = animeData.synopsis;
+        
+        // Show read more toggle button if long enough
+        if (animeData.synopsis.length > 280) {
+          synBtn.style.display = 'flex';
+          synBtn.addEventListener('click', () => {
+            if (synVal.classList.contains('truncated')) {
+              synVal.classList.remove('truncated');
+              synBtn.querySelector('span').textContent = 'Read Less';
+              synBtn.querySelector('i').setAttribute('data-lucide', 'chevron-up');
+            } else {
+              synVal.classList.add('truncated');
+              synBtn.querySelector('span').textContent = 'Read More';
+              synBtn.querySelector('i').setAttribute('data-lucide', 'chevron-down');
+            }
+            if (window.lucide) window.lucide.createIcons();
+          });
+        }
+      }
+
+      // 5. YouTube trailer embed
+      const trailerContainer = document.getElementById('anime-trailer-container');
+      const trailerSection = document.getElementById('anime-trailer-section');
+      if (trailerContainer && trailerSection && animeData.trailer?.embed_url) {
+        // Embed without auto-play to avoid noisy UX
+        trailerSection.style.display = 'block';
+        trailerContainer.innerHTML = `
+          <iframe src="${animeData.trailer.embed_url}" 
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowfullscreen>
+          </iframe>
+        `;
+      }
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderRightColumn() {
+      // 1. Poster image
+      const poster = document.getElementById('anime-sidebar-poster-img');
+      const posterUrl = animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url;
+      if (poster && posterUrl) {
+        poster.src = posterUrl;
+        poster.alt = animeData.title;
+      }
+
+      // 2. Action buttons triggers
+      setupSidebarActionButtons();
+
+      // 3. Personal User Rating Stars Selection
+      const ratingStarsWrapper = document.getElementById('user-rating-stars-wrapper');
+      if (ratingStarsWrapper) {
+        const savedRating = getUserRating(malId);
+        const ratingComp = RatingStars(savedRating, (newVal) => {
+          saveUserRating(malId, newVal);
+          Toast(`You rated this anime ${newVal}/10 Stars!`, 'success');
+        });
+        ratingStarsWrapper.appendChild(ratingComp);
+      }
+
+      // 4. CSS-Only Score graph breakdown values representation
+      const scoreBreakdown = document.getElementById('score-breakdown-bar-chart');
+      if (scoreBreakdown) {
+        // Generate nicely looking statistics distribution centering near the show's score
+        const centerScore = Math.round(animeData.score || 7.5);
+        let barHtml = '';
+        for (let i = 10; i >= 1; i--) {
+          // Compute gaussian-like curve percentages for dummy graphics
+          let pct = 5;
+          if (i === centerScore) pct = 65;
+          else if (Math.abs(i - centerScore) === 1) pct = 35;
+          else if (Math.abs(i - centerScore) === 2) pct = 15;
+          else if (Math.abs(i - centerScore) === 3) pct = 8;
+          
+          barHtml += `
+            <div class="stat-row">
+              <span class="stat-label">${i}</span>
+              <div class="stat-bar-bg">
+                <div class="stat-bar-fill" style="width: ${pct}%"></div>
+              </div>
+              <span class="stat-value">${pct}%</span>
+            </div>
+          `;
+        }
+        scoreBreakdown.innerHTML = barHtml;
+      }
+
+      // 5. Info Table list content mappings
+      const infoList = document.getElementById('anime-details-table-list');
+      if (infoList) {
+        const itemRows = [
+          { key: "Type", val: animeData.type },
+          { key: "Source", val: animeData.source },
+          { key: "Episodes", val: animeData.episodes },
+          { key: "Status", val: animeData.status },
+          { key: "Aired", val: animeData.aired?.string },
+          { key: "Broadcast", val: animeData.broadcast?.string },
+          { key: "Producers", val: animeData.producers?.map(p => p.name).slice(0, 2).join(', ') },
+          { key: "Licensors", val: animeData.licensors?.map(l => l.name).slice(0, 1).join(', ') },
+          { key: "Studios", val: animeData.studios?.map(s => s.name).join(', ') },
+          { key: "Themes", val: animeData.themes?.map(t => t.name).join(', ') },
+          { key: "Demographics", val: animeData.demographics?.map(d => d.name).join(', ') },
+          { key: "Duration", val: animeData.duration },
+          { key: "Rating", val: animeData.rating }
+        ];
+
+        infoList.innerHTML = itemRows.map(row => {
+          if (!row.val) return '';
+          return `
+            <div class="info-table-row">
+              <span class="info-table-key">${row.key}</span>
+              <span class="info-table-val">${row.val}</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function setupSidebarActionButtons() {
+      const watchlistBtn = document.getElementById('btn-sidebar-toggle-watchlist');
+      const favBtn = document.getElementById('btn-sidebar-toggle-favorite');
+      const watchStatusBtn = document.getElementById('btn-sidebar-toggle-watching');
+
+      const refreshBtnStates = () => {
+        // Watchlist state
+        const isAddedW = isInWatchlist(malId);
+        if (watchlistBtn) {
+          if (isAddedW) {
+            watchlistBtn.classList.add('btn-active');
+            watchlistBtn.innerHTML = `<i data-lucide="check"></i> <span>In Watchlist</span>`;
+          } else {
+            watchlistBtn.classList.remove('btn-active');
+            watchlistBtn.innerHTML = `<i data-lucide="bookmark"></i> <span>Add to Watchlist</span>`;
+          }
+        }
+
+        // Favorites state
+        const isAddedF = isFavorite(malId);
+        if (favBtn) {
+          if (isAddedF) {
+            favBtn.classList.add('btn-active');
+            favBtn.innerHTML = `<i data-lucide="heart-off"></i> <span>In Favourites</span>`;
+          } else {
+            favBtn.classList.remove('btn-active');
+            favBtn.innerHTML = `<i data-lucide="heart"></i> <span>Add to Favourites</span>`;
+          }
+        }
+
+        // Watching status state
+        if (watchStatusBtn) {
+          const profile = getProfile();
+          const wItem = profile.watchlist.find(w => w.malId === Number(malId));
+          if (wItem && wItem.status === 'watching') {
+            watchStatusBtn.classList.add('btn-active');
+            watchStatusBtn.innerHTML = `<i data-lucide="check"></i> <span>Currently Watching</span>`;
+          } else {
+            watchStatusBtn.classList.remove('btn-active');
+            watchStatusBtn.innerHTML = `<i data-lucide="play-circle"></i> <span>Mark as Watching</span>`;
+          }
+        }
+        if (window.lucide) window.lucide.createIcons();
+      };
+
+      refreshBtnStates();
+
+      const posterUrl = animeData.images?.jpg?.large_image_url || animeData.images?.jpg?.image_url;
+
+      // Watchlist toggle
+      if (watchlistBtn) {
+        watchlistBtn.addEventListener('click', () => {
+          const added = toggleWatchlist({ malId: Number(malId), title: animeData.title, posterUrl, score: animeData.score });
+          Toast(added ? "Added to your Watchlist!" : "Removed from Watchlist.", added ? "success" : "info");
+          refreshBtnStates();
+        });
+      }
+
+      // Favorite toggle
+      if (favBtn) {
+        favBtn.addEventListener('click', () => {
+          const added = toggleFavorite({ malId: Number(malId), title: animeData.title, posterUrl, score: animeData.score });
+          Toast(added ? "Added to your Favourites!" : "Removed from Favourites.", added ? "success" : "info");
+          refreshBtnStates();
+        });
+      }
+
+      // Mark watching status
+      if (watchStatusBtn) {
+        watchStatusBtn.addEventListener('click', () => {
+          const profile = getProfile();
+          const isAdded = isInWatchlist(malId);
+          if (!isAdded) {
+            // Add to watchlist first
+            toggleWatchlist({ malId: Number(malId), title: animeData.title, posterUrl, score: animeData.score });
+          }
+          updateWatchlistStatus(Number(malId), 'watching');
+          Toast("Status set to: Currently Watching!", "success");
+          refreshBtnStates();
+        });
+      }
+    }
+
+    // Episodes fetch and pager logic
+    async function loadEpisodes() {
+      const grid = document.getElementById('anime-episodes-grid-el');
+      const pager = document.getElementById('anime-episodes-pagination-row');
+      
+      if (!grid) return;
+
+      grid.innerHTML = `<div style="text-align:center; padding:16px; color:var(--color-text-secondary); width:100%;">Fetching episodes...</div>`;
+
+      try {
+        const response = await NamiAPI.getAnimeEpisodes(malId, currentEpPage);
+        animeEpisodes = response.data || [];
+
+        // Fetch completed, render
+        if (animeEpisodes.length > 0) {
+          renderEpisodesList();
+          renderEpisodesPagination(response.pagination);
+        } else {
+          // If empty (e.g. Jikan episodes returned empty), fallback to generating numbered list matching episodes count
+          const fallbackCount = animeData.episodes || 12; // fallback representation
+          animeEpisodes = Array.from({ length: fallbackCount }, (_, index) => ({
+            mal_id: index + 1,
+            episode_id: index + 1,
+            title: `Episode ${index + 1}`
+          }));
+          renderEpisodesList();
+          pager.innerHTML = ''; // no Jikan pages needed
+        }
+      } catch (err) {
+        console.error("Failed to load episode list details, trying fallback generator", err);
+        const fallbackCount = animeData.episodes || 12;
+        animeEpisodes = Array.from({ length: fallbackCount }, (_, index) => ({
+          mal_id: index + 1,
+          episode_id: index + 1,
+          title: `Episode ${index + 1}`
+        }));
+        renderEpisodesList();
+      }
+    }
+
+    function renderEpisodesList() {
+      const grid = document.getElementById('anime-episodes-grid-el');
+      if (!grid) return;
+
+      grid.innerHTML = '';
+      
+      const profile = getProfile();
+      // Gather viewed episodes list from watch history
+      const viewedEps = profile.watchHistory
+        .filter(h => h.malId === Number(malId))
+        .map(h => h.episode);
+
+      animeEpisodes.forEach((ep, index) => {
+        const num = ep.episode_id || (index + 1);
+        const title = ep.title || `Episode ${num}`;
+        const hasViewed = viewedEps.includes(num) ? 'viewed' : '';
+
+        const epBtn = document.createElement('a');
+        epBtn.href = `watch.html?id=${malId}&ep=${num}&lang=${currentLanguage}`;
+        epBtn.className = `episode-btn ${hasViewed}`;
+        epBtn.innerHTML = `
+          <div class="episode-btn-left">
+            <span class="ep-num">EP ${num}</span>
+            <span class="ep-title" title="${title}">${title}</span>
+          </div>
+          <i data-lucide="check-circle-2" class="viewed-icon" style="width:16px; height:16px;"></i>
+        `;
+        grid.appendChild(epBtn);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderEpisodesPagination(pagination) {
+      const pager = document.getElementById('anime-episodes-pagination-row');
+      if (!pager || !pagination || !pagination.last_visible_page || pagination.last_visible_page <= 1) {
+        if (pager) pager.innerHTML = '';
+        return;
+      }
+
+      let pagesHtml = '';
+      for (let i = 1; i <= pagination.last_visible_page; i++) {
+        const activeCls = i === currentEpPage ? 'active' : '';
+        pagesHtml += `<button class="pagination-btn ${activeCls}" onclick="changeEpPage(${i})">${i}</button>`;
+      }
+      pager.innerHTML = pagesHtml;
+    }
+
+    window.changeEpPage = function(pageNumber) {
+      currentEpPage = pageNumber;
+      loadEpisodes();
+    };
+
+    window.toggleEpLanguage = function(lang) {
+      currentLanguage = lang;
+      
+      // Update UI toggle style
+      const subBtn = document.getElementById('toggle-sub-ep');
+      const dubBtn = document.getElementById('toggle-dub-ep');
+      if (lang === 'sub') {
+        subBtn.classList.add('active');
+        dubBtn.classList.remove('active');
+      } else {
+        dubBtn.classList.add('active');
+        subBtn.classList.remove('active');
+      }
+
+      // Re-render episode grid list to update href tags
+      renderEpisodesList();
+    };
+
+    // Load sub-resources character panels
+    async function loadCharacters() {
+      const container = document.getElementById('anime-characters-container');
+      if (!container) return;
+
+      try {
+        const response = await NamiAPI.getAnimeCharacters(malId);
+        if (response && response.data && response.data.length > 0) {
+          container.innerHTML = response.data.slice(0, 10).map(char => {
+            const charName = char.character?.name || 'Character';
+            const role = char.role || 'Supporting';
+            const charImg = char.character?.images?.jpg?.image_url;
+            
+            // VA
+            const va = char.voice_actors?.find(v => v.language === 'Japanese');
+            const vaName = va ? va.person?.name : 'N/A';
+
+            return `
+              <div class="character-card">
+                <div class="character-img-wrapper">
+                  <img src="${charImg}" alt="${charName}" loading="lazy">
+                  <span class="character-role-badge">${role}</span>
+                </div>
+                <div class="character-info-box">
+                  <span class="character-name" title="${charName}">${charName}</span>
+                  <span class="va-name" title="${vaName}">${vaName}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = `<div style="color:var(--color-text-secondary); font-size:0.85rem; padding:16px;">No character details available.</div>`;
+        }
+      } catch (err) {
+        console.error("Failed to load characters", err);
+      }
+    }
+
+    // Load sub-resources staff
+    async function loadStaff() {
+      const container = document.getElementById('anime-staff-container');
+      if (!container) return;
+
+      try {
+        const response = await NamiAPI.getAnimeStaff(malId);
+        if (response && response.data && response.data.length > 0) {
+          container.innerHTML = response.data.slice(0, 8).map(st => {
+            const name = st.person?.name || 'Name';
+            const roles = st.positions ? st.positions.join(', ') : 'Staff';
+            return `
+              <div class="staff-pill">
+                <div class="staff-meta">
+                  <span class="staff-name">${name}</span>
+                  <span class="staff-role">${roles}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = `<div style="color:var(--color-text-secondary); font-size:0.85rem; padding:16px;">No staff details available.</div>`;
+        }
+      } catch (err) {
+        console.error("Failed to load staff list", err);
+      }
+    }
+
+    // Load Recommendations
+    async function loadRecommendations() {
+      const container = document.getElementById('anime-recommendations-container');
+      if (!container) return;
+
+      try {
+        const response = await NamiAPI.getAnimeRecommendations(malId);
+        if (response && response.data && response.data.length > 0) {
+          container.innerHTML = '';
+          response.data.slice(0, 6).forEach(rec => {
+            const rAnime = rec.entry;
+            // Map small recommendation object fields to full structure representation
+            const fullAnimeMock = {
+              mal_id: rAnime.mal_id,
+              title: rAnime.title,
+              images: rAnime.images,
+              score: 0 // dummy
+            };
+            const card = AnimeCard(fullAnimeMock, { size: 'sm', showActions: false });
+            container.appendChild(card);
+          });
+          if (window.lucide) window.lucide.createIcons();
+        } else {
+          container.innerHTML = `<div style="color:var(--color-text-secondary); font-size:0.85rem; padding:16px; grid-column:1/-1;">No related recommendations found.</div>`;
+        }
+      } catch (err) {
+        console.error("Failed to load recommendations", err);
+      }
+    }
+
+    // Load Reviews
+    async function loadReviews() {
+      const container = document.getElementById('anime-reviews-container');
+      if (!container) return;
+
+      try {
+        const response = await NamiAPI.getAnimeReviews(malId);
+        if (response && response.data && response.data.length > 0) {
+          container.innerHTML = response.data.slice(0, 3).map(rev => {
+            const userName = rev.user?.username || 'Reviewer';
+            const score = rev.score || 'N/A';
+            const content = rev.review ? truncateText(rev.review, 350) : 'No content review.';
+            const isTruncated = rev.review?.length > 350;
+
+            return `
+              <div class="review-item">
+                <div class="review-header">
+                  <div class="review-user">
+                    <div class="review-user-avatar"></div>
+                    <span>${userName}</span>
+                  </div>
+                  <span class="review-rating-badge">★ ${score}/10 Score</span>
+                </div>
+                <p class="review-content truncated">${content}</p>
+                ${isTruncated ? `<button class="synopsis-toggle-btn read-full-review-inline-btn" onclick="toggleFullReviewText(this, \`${rev.review?.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">Read Full Review</button>` : ''}
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = `<div style="color:var(--color-text-secondary); font-size:0.85rem; padding:16px;">Be the first to review this anime on MyAnimeList!</div>`;
+        }
+      } catch (err) {
+        console.error("Failed to load reviews", err);
+      }
+    }
+
+    // Review expansion handler
+    window.toggleFullReviewText = function(btn, fullText) {
+      const p = btn.previousElementSibling;
+      if (p.classList.contains('truncated')) {
+        p.classList.remove('truncated');
+        p.innerHTML = fullText.replace(/\n/g, '<br>');
+        btn.textContent = 'Show Less';
+      } else {
+        p.classList.add('truncated');
+        p.textContent = truncateText(fullText, 350);
+        btn.textContent = 'Read Full Review';
+      }
+    };
+
+    function setElementText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+  </script>
+</body>
+</html>
