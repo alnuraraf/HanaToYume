@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule - NamiTube</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .schedule-container { padding: 100px 5% 2rem; max-width: 1200px; margin: 0 auto; }
+        .day-section { margin-bottom: 3rem; }
+        .day-title { font-size: 1.5rem; color: var(--primary); border-bottom: 2px solid var(--surface-hover); padding-bottom: 0.5rem; margin-bottom: 1.5rem; text-transform: capitalize; }
+    </style>
+</head>
+<body>
+    <main class="schedule-container" id="schedule-main">
+        <h1 style="text-align: center; margin-bottom: 2rem;">Weekly Release Schedule</h1>
+        <div id="schedule-content">Loading...</div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('schedule-content');
+            const data = await API.fetchWithRetry('https://api.jikan.moe/v4/schedules');
+            
+            if (data && data.data) {
+                container.innerHTML = '';
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                
+                // Grouping by day manually as Jikan v4 returns a flat list for schedules endpoint sometimes depending on query
+                const grouped = days.reduce((acc, day) => { acc[day] = []; return acc; }, {});
+                
+                data.data.forEach(anime => {
+                    const broadcastDay = anime.broadcast.day ? anime.broadcast.day.replace('s', '').toLowerCase() : 'unknown';
+                    if(grouped[broadcastDay]) {
+                        grouped[broadcastDay].push(anime);
+                    }
+                });
+
+                days.forEach(day => {
+                    if(grouped[day].length > 0) {
+                        let html = `<div class="day-section"><h2 class="day-title">${day}</h2><div class="anime-grid">`;
+                        grouped[day].forEach(anime => {
+                            html += `
+                                <a href="details.html?id=${anime.mal_id}" class="anime-card">
+                                    <img src="${anime.images.jpg.large_image_url}" class="anime-poster">
+                                    <div class="anime-info">
+                                        <div class="anime-title">${anime.title}</div>
+                                        <div class="anime-meta"><span>${anime.broadcast.time || 'TBA'} JST</span></div>
+                                    </div>
+                                </a>`;
+                        });
+                        html += `</div></div>`;
+                        container.innerHTML += html;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
