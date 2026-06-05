@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details - NamiTube</title>
+    <link rel="icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .details-hero { width: 100%; height: 400px; position: relative; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 2rem 5%; }
+        .details-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, transparent 100%); }
+        .details-content { position: relative; z-index: 10; display: flex; gap: 2rem; align-items: flex-end; transform: translateY(50px); }
+        .details-poster { width: 200px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
+        .details-info h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .details-meta { display: flex; gap: 1rem; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+        .details-synopsis { max-width: 800px; font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); margin-top: 4rem; padding: 0 5%; }
+        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; padding: 2rem 5%; }
+        .ep-btn { background: var(--surface); text-align: center; padding: 1rem; border-radius: 6px; transition: var(--transition); font-weight: 600; }
+        .ep-btn:hover { background: var(--primary); transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+    <main id="details-main">
+        </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const malId = urlParams.get('id');
+            const mainEl = document.getElementById('details-main');
+
+            if (!malId) {
+                mainEl.innerHTML = '<h2 style="text-align:center; padding: 100px;">Anime not found.</h2>';
+                return;
+            }
+
+            const anime = await API.getAnimeDetails(malId);
+            if(anime) {
+                const totalEps = anime.episodes || 12; // Fallback if unknown
+                let epsHtml = '';
+                for(let i = 1; i <= totalEps; i++) {
+                    epsHtml += `<a href="watch.html?id=${malId}&ep=${i}" class="ep-btn">EP ${i}</a>`;
+                }
+
+                mainEl.innerHTML = `
+                    <div class="details-hero" style="background-image: url('${anime.trailer?.images?.maximum_image_url || anime.images.jpg.large_image_url}')">
+                        <div class="details-content">
+                            <img src="${anime.images.jpg.large_image_url}" class="details-poster" alt="${anime.title}">
+                            <div class="details-info">
+                                <h1>${anime.title}</h1>
+                                <div class="details-meta">
+                                    <span><i class="fa-solid fa-star"></i> ${anime.score}</span>
+                                    <span>${anime.status}</span>
+                                    <span>${anime.year || 'N/A'}</span>
+                                </div>
+                                <a href="watch.html?id=${malId}&ep=1" class="btn btn-primary"><i class="fa-solid fa-play"></i> Watch Episode 1</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-synopsis">${anime.synopsis}</div>
+                    <h2 class="section-title">Episodes</h2>
+                    <div class="episodes-grid">${epsHtml}</div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
