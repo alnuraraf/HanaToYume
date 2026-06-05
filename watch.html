@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch - NamiTube</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .player-controls { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding: 1rem 5%; background: var(--surface); border-radius: 8px; }
+        .lang-toggle button { background: var(--surface-hover); color: var(--text-main); border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; transition: var(--transition); }
+        .lang-toggle button.active { background: var(--primary); }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="player-container">
+            <iframe id="video-player" class="player-iframe" allowfullscreen></iframe>
+        </div>
+
+        <div class="player-controls">
+            <div class="ep-nav">
+                <button class="btn" id="prev-ep"><i class="fa-solid fa-backward-step"></i> Prev</button>
+                <button class="btn" id="next-ep">Next <i class="fa-solid fa-forward-step"></i></button>
+            </div>
+            <div class="lang-toggle">
+                <button id="btn-sub" class="active">Sub</button>
+                <button id="btn-dub">Dub</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/user.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const malId = urlParams.get('id');
+            let episode = urlParams.get('ep') || 1;
+            let currentLang = 'sub';
+
+            const player = document.getElementById('video-player');
+            
+            function updatePlayer() {
+                player.src = `https://megaplay.buzz/stream/mal/${malId}/${episode}/${currentLang}`;
+                UserSystem.saveHistory(malId, episode);
+                
+                // Update URL without reloading
+                window.history.replaceState({}, '', `watch.html?id=${malId}&ep=${episode}`);
+            }
+
+            document.getElementById('btn-sub').addEventListener('click', (e) => {
+                currentLang = 'sub';
+                e.target.classList.add('active');
+                document.getElementById('btn-dub').classList.remove('active');
+                updatePlayer();
+            });
+
+            document.getElementById('btn-dub').addEventListener('click', (e) => {
+                currentLang = 'dub';
+                e.target.classList.add('active');
+                document.getElementById('btn-sub').classList.remove('active');
+                updatePlayer();
+            });
+
+            document.getElementById('next-ep').addEventListener('click', () => {
+                episode++;
+                updatePlayer();
+            });
+
+            if(malId) updatePlayer();
+        });
+    </script>
+</body>
+</html>
