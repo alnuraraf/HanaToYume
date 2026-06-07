@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community — NamiTube Infinity</title>
+  <meta name="description" content="Join the NamiTube community. Share collections, participate in polls, and discuss anime.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <style>
+    .community-hero { padding: 48px 16px; text-align: center; max-width: 700px; margin: 0 auto; }
+    .community-hero h1 { font-size: clamp(28px, 5vw, 42px); margin-bottom: 12px; }
+    .community-hero p { font-size: 16px; color: var(--nt-text-secondary); line-height: 1.6; }
+    .community-grid { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 24px 0 48px; }
+    @media (min-width: 768px) { .community-grid { grid-template-columns: repeat(2, 1fr); } }
+    .community-card { background: var(--nt-bg-card); border: 1px solid var(--nt-border); border-radius: var(--nt-radius-md); padding: 24px; transition: var(--nt-transition); }
+    .community-card:hover { border-color: var(--nt-accent-border); }
+    .community-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .community-card p { font-size: 14px; color: var(--nt-text-secondary); line-height: 1.5; }
+    .activity-feed { display: flex; flex-direction: column; gap: 10px; }
+    .activity-item { display: flex; gap: 12px; padding: 12px; background: var(--nt-bg-elevated); border-radius: var(--nt-radius-sm); border: 1px solid var(--nt-border); }
+    .activity-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--nt-accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+    .activity-text { font-size: 13px; color: var(--nt-text-secondary); }
+    .activity-text strong { color: var(--nt-text-primary); }
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header" role="banner"></header>
+  <div class="search-overlay" id="search-overlay">
+    <div class="nt-container">
+      <input type="text" placeholder="Search anime..." id="search-overlay-input" onkeydown="if(event.key==='Enter')window.location.href='search.html?q='+encodeURIComponent(this.value)">
+    </div>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="drawer-nav" id="drawer-nav"></div>
+  </div>
+  <div class="rate-limit-banner" id="rate-limit-banner"></div>
+  <div class="private-banner" id="private-banner">Personalisation features are unavailable in this browser mode.</div>
+
+  <main id="main-content">
+    <div class="community-hero">
+      <h1>Community</h1>
+      <p>Connect with fellow anime fans. Share collections, vote in polls, and stay updated with the latest activity.</p>
+    </div>
+    <div class="nt-container">
+      <div class="community-grid">
+        <div class="community-card reveal">
+          <h3>Anime Discussions</h3>
+          <p>Join topic-based threads about your favorite series, episodes, and characters. Share theories and reactions.</p>
+          <div class="activity-feed" style="margin-top:12px;" id="discussion-feed"></div>
+        </div>
+        <div class="community-card reveal">
+          <h3>User Collections</h3>
+          <p>Browse curated collections created by the community. From "Best Mecha" to "Hidden Romance Gems."</p>
+          <div class="activity-feed" style="margin-top:12px;" id="collection-feed"></div>
+        </div>
+        <div class="community-card reveal">
+          <h3>Community Polls</h3>
+          <p>Vote on weekly polls: Best OP, Best Character, Best Episode, and more. Results update live.</p>
+          <div class="activity-feed" style="margin-top:12px;" id="poll-feed"></div>
+        </div>
+        <div class="community-card reveal">
+          <h3>Activity Feed</h3>
+          <p>See what the community is watching right now. Real-time updates from active users.</p>
+          <div class="activity-feed" style="margin-top:12px;" id="activity-feed"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer" role="contentinfo"></footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="module">
+    import { renderHeader, renderFooter, initHeaderInteractions } from './js/components.js';
+    import { isPrivateMode, showPrivateBanner, setupIntersectionReveal, escapeHtml } from './js/utils.js';
+
+    document.getElementById('site-header').innerHTML = renderHeader('');
+    document.getElementById('site-footer').innerHTML = renderFooter();
+    initHeaderInteractions();
+    if (isPrivateMode()) showPrivateBanner();
+
+    const drawerNav = document.getElementById('drawer-nav');
+    if (drawerNav) {
+      drawerNav.innerHTML = `
+        <a href="home.html">Home</a>
+        <a href="discover.html">Discover</a>
+        <a href="search.html">Search</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="spotlight.html">Spotlight</a>
+        <a href="library.html">Library</a>
+        <a href="donate.html">Donate</a>
+        <hr style="border:none;border-top:1px solid var(--nt-border);margin:12px 0;">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      `;
+    }
+
+    const sampleActivities = [
+      { user: 'Kaito', action: 'added', target: 'Attack on Titan', type: 'watchlist' },
+      { user: 'Sakura', action: 'rated', target: 'Steins;Gate', type: 'rating' },
+      { user: 'Ren', action: 'completed', target: 'Death Note', type: 'completed' },
+      { user: 'Aoi', action: 'favorited', target: 'One Piece', type: 'favorite' },
+      { user: 'Hinata', action: 'started watching', target: 'Demon Slayer', type: 'watching' },
+    ];
+
+    function renderFeed(id, items) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = items.map(a => `
+        <div class="activity-item">
+          <div class="activity-avatar">${a.user[0]}</div>
+          <div class="activity-text"><strong>${escapeHtml(a.user)}</strong> ${a.action} <strong>${escapeHtml(a.target)}</strong></div>
+        </div>
+      `).join('');
+    }
+
+    renderFeed('discussion-feed', sampleActivities.slice(0, 3));
+    renderFeed('collection-feed', sampleActivities.slice(1, 4));
+    renderFeed('poll-feed', sampleActivities.slice(2, 5));
+    renderFeed('activity-feed', sampleActivities);
+
+    setupIntersectionReveal();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

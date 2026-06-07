@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover — NamiTube Infinity</title>
+  <meta name="description" content="Discover new anime with dynamic filters and sorting on NamiTube.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/search.css">
+</head>
+<body>
+  <header class="site-header" id="site-header" role="banner"></header>
+  <div class="search-overlay" id="search-overlay">
+    <div class="nt-container">
+      <input type="text" placeholder="Search anime..." id="search-overlay-input" onkeydown="if(event.key==='Enter')window.location.href='search.html?q='+encodeURIComponent(this.value)">
+    </div>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="drawer-nav" id="drawer-nav"></div>
+  </div>
+  <div class="rate-limit-banner" id="rate-limit-banner"></div>
+  <div class="private-banner" id="private-banner">Personalisation features are unavailable in this browser mode.</div>
+
+  <main id="main-content">
+    <div class="nt-container" style="padding-top:24px;">
+      <h1 style="font-size:24px;margin-bottom:16px;">Discover Anime</h1>
+      <div class="search-layout" style="padding:0;">
+        <aside class="filter-sidebar" id="filter-panel">
+          <div class="filter-group">
+            <label>Genre</label>
+            <div class="filter-options" id="genre-filters"></div>
+          </div>
+          <div class="filter-group">
+            <label>Year</label>
+            <input type="number" class="filter-select" id="year" placeholder="e.g. 2024">
+          </div>
+          <div class="filter-group">
+            <label>Season</label>
+            <select class="filter-select" id="season">
+              <option value="">Any</option>
+              <option value="spring">Spring</option>
+              <option value="summer">Summer</option>
+              <option value="fall">Fall</option>
+              <option value="winter">Winter</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select class="filter-select" id="status">
+              <option value="">Any</option>
+              <option value="airing">Airing</option>
+              <option value="completed">Completed</option>
+              <option value="upcoming">Upcoming</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Type</label>
+            <select class="filter-select" id="type">
+              <option value="">Any</option>
+              <option value="tv">TV</option>
+              <option value="movie">Movie</option>
+              <option value="ova">OVA</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Sort By</label>
+            <select class="filter-select" id="sort-by">
+              <option value="popularity">Popularity</option>
+              <option value="score">Score</option>
+              <option value="favorites">Favorites</option>
+              <option value="rank">Rank</option>
+              <option value="members">Members</option>
+            </select>
+          </div>
+          <button class="nt-btn nt-btn-primary" id="apply-filters" style="width:100%;margin-top:8px;">Apply</button>
+          <button class="nt-btn nt-btn-secondary" id="reset-filters" style="width:100%;margin-top:8px;">Reset</button>
+        </aside>
+        <div class="results-area">
+          <div class="results-header" id="results-header">Discovering anime...</div>
+          <div class="results-grid" id="search-results"></div>
+        </div>
+      </div>
+      <button class="filter-toggle-btn" id="filter-toggle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg> Filters
+      </button>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer" role="contentinfo"></footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="module">
+    import { renderHeader, renderFooter, AnimeCard, SkeletonCard, initHeaderInteractions } from './js/components.js';
+    import { jikan } from './js/api.js';
+    import { isPrivateMode, showPrivateBanner, setupIntersectionReveal, setupLazyImages, getParam, escapeHtml } from './js/utils.js';
+
+    document.getElementById('site-header').innerHTML = renderHeader('discover');
+    document.getElementById('site-footer').innerHTML = renderFooter();
+    initHeaderInteractions();
+    if (isPrivateMode()) showPrivateBanner();
+
+    const drawerNav = document.getElementById('drawer-nav');
+    if (drawerNav) {
+      drawerNav.innerHTML = `
+        <a href="home.html">Home</a>
+        <a href="discover.html" class="active">Discover</a>
+        <a href="search.html">Search</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="spotlight.html">Spotlight</a>
+        <a href="library.html">Library</a>
+        <a href="donate.html">Donate</a>
+        <hr style="border:none;border-top:1px solid var(--nt-border);margin:12px 0;">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      `;
+    }
+
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = true;
+    let currentFilters = {};
+
+    async function loadGenres() {
+      try {
+        const data = await jikan('/genres/anime');
+        const list = document.getElementById('genre-filters');
+        if (list && data?.data) {
+          list.innerHTML = data.data.slice(0, 20).map(g => `
+            <label class="filter-checkbox"><input type="checkbox" value="${g.mal_id}" name="genre"><span>${escapeHtml(g.name)}</span></label>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+
+    function collectFilters() {
+      const f = {};
+      const year = document.getElementById('year');
+      if (year && year.value) f.start_date = year.value + '-01-01';
+      const season = document.getElementById('season');
+      if (season && season.value) f.season = season.value;
+      const status = document.getElementById('status');
+      if (status && status.value) f.status = status.value;
+      const type = document.getElementById('type');
+      if (type && type.value) f.type = type.value;
+      const sortBy = document.getElementById('sort-by');
+      if (sortBy && sortBy.value) { f.order_by = sortBy.value; f.sort = 'desc'; }
+      const genres = Array.from(document.querySelectorAll('input[name="genre"]:checked')).map(i => i.value);
+      if (genres.length) f.genres = genres.join(',');
+      currentFilters = f;
+    }
+
+    async function performSearch() {
+      if (isLoading) return;
+      isLoading = true;
+      const results = document.getElementById('search-results');
+      const header = document.getElementById('results-header');
+      if (currentPage === 1 && results) {
+        results.innerHTML = Array(12).fill(0).map(() => SkeletonCard('lg')).join('');
+      }
+      const params = new URLSearchParams();
+      Object.entries(currentFilters).forEach(([k, v]) => { if (v) params.set(k, v); });
+      params.set('page', String(currentPage));
+      params.set('limit', '24');
+      try {
+        const data = await jikan('/anime?' + params.toString());
+        const items = data?.data || [];
+        if (currentPage === 1 && results) results.innerHTML = '';
+        if (!items.length) {
+          hasMore = false;
+          if (currentPage === 1 && results) results.innerHTML = '<div class="empty-state"><p>No anime found matching your filters.</p></div>';
+        } else {
+          const html = items.map(item => AnimeCard(item, { size: 'lg' })).join('');
+          if (results) results.insertAdjacentHTML('beforeend', html);
+          hasMore = data?.pagination?.has_next_page ?? false;
+        }
+        if (header) header.textContent = `Discovering anime — Page ${currentPage}`;
+        setupLazyImages();
+      } catch (e) {
+        if (results) results.innerHTML = '<div class="empty-state"><p>Failed to load results.</p></div>';
+      } finally { isLoading = false; }
+    }
+
+    document.getElementById('apply-filters')?.addEventListener('click', () => {
+      collectFilters();
+      currentPage = 1;
+      hasMore = true;
+      performSearch();
+      if (window.innerWidth < 1024) document.getElementById('filter-panel').classList.remove('active');
+    });
+    document.getElementById('reset-filters')?.addEventListener('click', () => {
+      document.querySelectorAll('#filter-panel input, #filter-panel select').forEach(el => { if (el.type === 'checkbox') el.checked = false; else el.value = ''; });
+      currentFilters = {};
+      currentPage = 1;
+      hasMore = true;
+      performSearch();
+    });
+    document.getElementById('filter-toggle')?.addEventListener('click', () => {
+      document.getElementById('filter-panel').classList.toggle('active');
+    });
+
+    // URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const genreParam = urlParams.get('genre');
+    const studioParam = urlParams.get('studio');
+    const yearParam = urlParams.get('year');
+    const seasonParam = urlParams.get('season');
+    const statusParam = urlParams.get('status');
+    const typeParam = urlParams.get('type');
+    if (genreParam) currentFilters.genres = genreParam;
+    if (yearParam) { currentFilters.start_date = yearParam + '-01-01'; document.getElementById('year').value = yearParam; }
+    if (seasonParam) { currentFilters.season = seasonParam; document.getElementById('season').value = seasonParam; }
+    if (statusParam) { currentFilters.status = statusParam; document.getElementById('status').value = statusParam; }
+    if (typeParam) { currentFilters.type = typeParam; document.getElementById('type').value = typeParam; }
+
+    window.addEventListener('scroll', () => {
+      if (isLoading || !hasMore) return;
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300) {
+        currentPage++;
+        performSearch();
+      }
+    });
+
+    loadGenres().then(() => {
+      if (genreParam) {
+        const cb = document.querySelector(`input[value="${genreParam}"]`);
+        if (cb) cb.checked = true;
+      }
+      performSearch();
+    });
+    setupIntersectionReveal();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

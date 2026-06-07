@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — NamiTube Infinity</title>
+  <meta name="description" content="Manage your NamiTube profile, preferences, and viewing statistics.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+  <header class="site-header" id="site-header" role="banner"></header>
+  <div class="search-overlay" id="search-overlay">
+    <div class="nt-container">
+      <input type="text" placeholder="Search anime..." id="search-overlay-input" onkeydown="if(event.key==='Enter')window.location.href='search.html?q='+encodeURIComponent(this.value)">
+    </div>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="drawer-nav" id="drawer-nav"></div>
+  </div>
+  <div class="rate-limit-banner" id="rate-limit-banner"></div>
+  <div class="private-banner" id="private-banner">Personalisation features are unavailable in this browser mode.</div>
+
+  <main id="main-content">
+    <div class="nt-container" style="padding-top:24px;">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profile-avatar">
+          <span class="avatar-initial" id="avatar-initial">U</span>
+        </div>
+        <div class="profile-info">
+          <h2 id="profile-name" contenteditable="true">AnimeUser</h2>
+          <p class="join-date">Member since <span id="join-date">Loading...</span></p>
+        </div>
+      </div>
+      <div class="profile-stats" id="profile-stats"></div>
+      <div class="viewing-stats" id="viewing-stats"></div>
+      <div id="genre-chart"></div>
+      <h2 style="font-size:18px;margin:24px 0 12px;">Preferences</h2>
+      <div id="preferences"></div>
+      <div class="danger-zone">
+        <h3>Danger Zone</h3>
+        <p>Clear all your local data including watchlist, favorites, history, and settings.</p>
+        <button class="nt-btn nt-btn-danger" id="clear-all-data">Clear All Data</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer" role="contentinfo"></footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="module">
+    import { renderHeader, renderFooter, initHeaderInteractions } from './js/components.js';
+    import { initProfile } from './js/profile.js';
+    import { isPrivateMode, showPrivateBanner, setupIntersectionReveal } from './js/utils.js';
+
+    document.getElementById('site-header').innerHTML = renderHeader('');
+    document.getElementById('site-footer').innerHTML = renderFooter();
+    initHeaderInteractions();
+    if (isPrivateMode()) showPrivateBanner();
+
+    const drawerNav = document.getElementById('drawer-nav');
+    if (drawerNav) {
+      drawerNav.innerHTML = `
+        <a href="home.html">Home</a>
+        <a href="discover.html">Discover</a>
+        <a href="search.html">Search</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="spotlight.html">Spotlight</a>
+        <a href="library.html">Library</a>
+        <a href="donate.html">Donate</a>
+        <hr style="border:none;border-top:1px solid var(--nt-border);margin:12px 0;">
+        <a href="profile.html" class="active">Profile</a>
+        <a href="settings.html">Settings</a>
+      `;
+    }
+
+    initProfile();
+    setupIntersectionReveal();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — NamiTube Infinity</title>
+  <meta name="description" content="NamiTube settings: theme, accent colors, accessibility, and cache management.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <style>
+    .settings-section { padding: 24px 0; }
+    .settings-section h2 { font-size: 18px; margin-bottom: 16px; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--nt-border); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-size: 14px; font-weight: 500; }
+    .setting-desc { font-size: 12px; color: var(--nt-text-muted); margin-top: 2px; }
+    .toggle-switch { width: 44px; height: 24px; border-radius: 12px; background: var(--nt-bg-elevated); border: 1px solid var(--nt-border); position: relative; cursor: pointer; transition: var(--nt-transition); flex-shrink: 0; }
+    .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--nt-text-muted); transition: var(--nt-transition); }
+    .toggle-switch.active { background: var(--nt-accent); border-color: var(--nt-accent); }
+    .toggle-switch.active::after { left: 22px; background: #fff; }
+    .cache-btn { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="site-header" id="site-header" role="banner"></header>
+  <div class="search-overlay" id="search-overlay">
+    <div class="nt-container">
+      <input type="text" placeholder="Search anime..." id="search-overlay-input" onkeydown="if(event.key==='Enter')window.location.href='search.html?q='+encodeURIComponent(this.value)">
+    </div>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="drawer-nav" id="drawer-nav"></div>
+  </div>
+  <div class="rate-limit-banner" id="rate-limit-banner"></div>
+  <div class="private-banner" id="private-banner">Personalisation features are unavailable in this browser mode.</div>
+
+  <main id="main-content">
+    <div class="nt-container" style="padding-top:24px;max-width:720px;">
+      <h1 style="font-size:24px;margin-bottom:24px;">Settings</h1>
+
+      <div class="settings-section">
+        <h2>Appearance</h2>
+        <div class="setting-row">
+          <div><div class="setting-label">Theme</div><div class="setting-desc">Choose your preferred theme</div></div>
+          <select class="filter-select" id="theme-select" style="width:140px;">
+            <option value="dark">Dark</option>
+            <option value="amoled">AMOLED</option>
+            <option value="system">System</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Accent Color</div><div class="setting-desc">Customize the platform accent</div></div>
+          <div class="color-swatches" id="accent-swatches"></div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Accessibility</h2>
+        <div class="setting-row">
+          <div><div class="setting-label">Reduced Motion</div><div class="setting-desc">Minimize animations</div></div>
+          <div class="toggle-switch" id="toggle-motion"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">High Contrast</div><div class="setting-desc">Increase contrast for readability</div></div>
+          <div class="toggle-switch" id="toggle-contrast"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Large Text</div><div class="setting-desc">Increase base font size</div></div>
+          <div class="toggle-switch" id="toggle-large-text"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Focus Highlights</div><div class="setting-desc">Always show focus indicators</div></div>
+          <div class="toggle-switch" id="toggle-focus"></div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Cache & Data</h2>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+          <div><div class="setting-label">Clear Cache</div><div class="setting-desc">Remove cached API responses</div></div>
+          <button class="nt-btn nt-btn-secondary cache-btn" id="clear-cache">Clear Cache</button>
+        </div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+          <div><div class="setting-label">Export Data</div><div class="setting-desc">Download all your local data as JSON</div></div>
+          <button class="nt-btn nt-btn-secondary cache-btn" id="export-data">Export Data</button>
+        </div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+          <div><div class="setting-label">Import Data</div><div class="setting-desc">Restore from a previous JSON export</div></div>
+          <button class="nt-btn nt-btn-secondary cache-btn" id="import-data">Import Data</button>
+          <input type="file" id="import-file" accept="application/json" style="display:none;">
+        </div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+          <div><div class="setting-label">Reset Settings</div><div class="setting-desc">Restore all settings to defaults</div></div>
+          <button class="nt-btn nt-btn-danger cache-btn" id="reset-settings">Reset All</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer" role="contentinfo"></footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="module">
+    import { renderHeader, renderFooter, Toast, Modal, initHeaderInteractions } from './js/components.js';
+    import { getProfile, saveProfile, clearAllData } from './js/storage.js';
+    import { clearApiCache } from './js/api.js';
+    import { isPrivateMode, showPrivateBanner, setupIntersectionReveal } from './js/utils.js';
+
+    document.getElementById('site-header').innerHTML = renderHeader('');
+    document.getElementById('site-footer').innerHTML = renderFooter();
+    initHeaderInteractions();
+    if (isPrivateMode()) showPrivateBanner();
+
+    const drawerNav = document.getElementById('drawer-nav');
+    if (drawerNav) {
+      drawerNav.innerHTML = `
+        <a href="home.html">Home</a>
+        <a href="discover.html">Discover</a>
+        <a href="search.html">Search</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="spotlight.html">Spotlight</a>
+        <a href="library.html">Library</a>
+        <a href="donate.html">Donate</a>
+        <hr style="border:none;border-top:1px solid var(--nt-border);margin:12px 0;">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html" class="active">Settings</a>
+      `;
+    }
+
+    const ACCENTS = ['#7c6aff','#ff6a8a','#00c2a8','#ff9f40','#4caf50','#f04060'];
+    const profile = getProfile();
+
+    // Accent swatches
+    const swatches = document.getElementById('accent-swatches');
+    if (swatches) {
+      swatches.innerHTML = ACCENTS.map(c => `
+        <button class="color-swatch ${profile.preferences.accentColor === c ? 'active' : ''}" style="background:${c};width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;" data-color="${c}"></button>
+      `).join('');
+      swatches.querySelectorAll('.color-swatch').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = getProfile();
+          p.preferences.accentColor = btn.dataset.color;
+          saveProfile(p);
+          document.documentElement.style.setProperty('--nt-accent', btn.dataset.color);
+          swatches.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          Toast('Accent color updated', 'success');
+        });
+      });
+    }
+
+    // Toggles
+    function setupToggle(id, key, callback) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const saved = localStorage.getItem('namitube_setting_' + key);
+      if (saved === 'true') el.classList.add('active');
+      el.addEventListener('click', () => {
+        el.classList.toggle('active');
+        localStorage.setItem('namitube_setting_' + key, el.classList.contains('active'));
+        if (callback) callback(el.classList.contains('active'));
+      });
+    }
+    setupToggle('toggle-motion', 'reducedMotion', (on) => {
+      document.documentElement.style.setProperty('animation-duration', on ? '0.01ms' : '');
+    });
+    setupToggle('toggle-contrast', 'highContrast', (on) => {
+      document.body.style.filter = on ? 'contrast(1.2)' : '';
+    });
+    setupToggle('toggle-large-text', 'largeText', (on) => {
+      document.documentElement.style.fontSize = on ? '18px' : '';
+    });
+    setupToggle('toggle-focus', 'focusHighlight');
+
+    document.getElementById('clear-cache')?.addEventListener('click', () => {
+      clearApiCache();
+      Toast('Cache cleared', 'success');
+    });
+
+    document.getElementById('export-data')?.addEventListener('click', () => {
+      const data = {};
+      Object.keys(localStorage).forEach(k => { if (k.startsWith('namitube_')) data[k] = localStorage.getItem(k); });
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `namitube-backup-${Date.now()}.json`; a.click();
+      URL.revokeObjectURL(url);
+      Toast('Data exported', 'success');
+    });
+
+    document.getElementById('import-data')?.addEventListener('click', () => {
+      document.getElementById('import-file').click();
+    });
+    document.getElementById('import-file')?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          Object.entries(data).forEach(([k, v]) => { if (k.startsWith('namitube_')) localStorage.setItem(k, v); });
+          Toast('Data imported successfully', 'success');
+          setTimeout(() => window.location.reload(), 800);
+        } catch (err) { Toast('Invalid backup file', 'error'); }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('reset-settings')?.addEventListener('click', () => {
+      Modal('Reset all settings?', 'This will clear all preferences, cache, and local data. This cannot be undone.', [
+        { label: 'Cancel', style: 'secondary' },
+        { label: 'Reset', style: 'danger', onClick: () => {
+          clearAllData();
+          clearApiCache();
+          window.location.reload();
+        }}
+      ]);
+    });
+
+    setupIntersectionReveal();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline — NamiTube Infinity</title>
+  <meta name="description" content="You are currently offline. NamiTube will reconnect automatically.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .offline-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 24px; }
+    .offline-icon { width: 80px; height: 80px; color: var(--nt-accent); margin-bottom: 24px; }
+    .offline-title { font-size: 28px; margin-bottom: 12px; }
+    .offline-desc { font-size: 16px; color: var(--nt-text-secondary); max-width: 400px; line-height: 1.6; margin-bottom: 24px; }
+    .offline-btn { padding: 12px 28px; border-radius: var(--nt-radius-md); background: var(--nt-accent); color: #fff; font-weight: 600; font-size: 14px; transition: var(--nt-transition); }
+    .offline-btn:hover { background: #6b5ce7; }
+    .offline-status { font-size: 13px; color: var(--nt-text-muted); margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <svg class="offline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+    </svg>
+    <h1 class="offline-title">You are offline</h1>
+    <p class="offline-desc">NamiTube needs an internet connection to stream anime and load data. We will reconnect automatically when your network is back.</p>
+    <button class="offline-btn" onclick="window.location.reload()">Retry Connection</button>
+    <p class="offline-status" id="status-text">Checking connection...</p>
+  </div>
+  <script>
+    function checkOnline() {
+      const status = document.getElementById('status-text');
+      if (navigator.onLine) {
+        status.textContent = 'Connection restored! Redirecting...';
+        setTimeout(() => window.location.href = 'index.html', 1500);
+      } else {
+        status.textContent = 'Waiting for network...';
+      }
+    }
+    window.addEventListener('online', checkOnline);
+    checkOnline();
+  </script>
+</body>
+</html>

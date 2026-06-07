@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Details — NamiTube Infinity</title>
+  <meta name="description" content="Anime details, episodes, characters, and more on NamiTube.">
+  <link rel="icon" type="image/png" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHE6pMgjbJ6YDLaMAtDUZCs6Zhkvxl0_fQnb0c0ZCmJOYRB_4N8dQ0ZWosBq_sZPK2wFel2E43Z2meo25JL3i7IZYkJ35FZ7lZ_BZfwlWofAKGhF1gWpFsxofeGUr87Peu6s7xtgvJMnrbtNnd4vJPtB7uG3L_wJ9tT8PKRCh-PXSxlyY9Ufn8OAzDY_Y/s320/NamiTube%20Original%20Favicon.png">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/anime.css">
+</head>
+<body>
+  <header class="site-header" id="site-header" role="banner"></header>
+  <div class="search-overlay" id="search-overlay">
+    <div class="nt-container">
+      <input type="text" placeholder="Search anime..." id="search-overlay-input" onkeydown="if(event.key==='Enter')window.location.href='search.html?q='+encodeURIComponent(this.value)">
+    </div>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="drawer-nav" id="drawer-nav"></div>
+  </div>
+  <div class="rate-limit-banner" id="rate-limit-banner"></div>
+  <div class="private-banner" id="private-banner">Personalisation features are unavailable in this browser mode.</div>
+
+  <main id="main-content">
+    <section class="anime-hero" id="anime-hero">
+      <div class="anime-hero-bg" id="anime-hero-bg"></div>
+      <div class="anime-hero-overlay" id="anime-hero-overlay"></div>
+    </section>
+
+    <section class="nt-container" id="anime-trailer"></section>
+
+    <section class="nt-container anime-section" id="anime-episodes">
+      <h2 class="section-heading">Episodes</h2>
+      <div class="control-row" style="margin-bottom:12px;">
+        <button class="control-btn active" id="ep-sub">Sub</button>
+        <button class="control-btn" id="ep-dub">Dub</button>
+      </div>
+      <div id="episodes-container"></div>
+    </section>
+
+    <section class="nt-container anime-section" id="anime-details">
+      <h2 class="section-heading">Details</h2>
+      <div class="details-table" id="details-table"></div>
+    </section>
+
+    <section class="nt-container anime-section" id="anime-characters">
+      <h2 class="section-heading">Characters</h2>
+      <div class="char-row" id="char-row"></div>
+    </section>
+
+    <section class="nt-container anime-section" id="anime-staff">
+      <h2 class="section-heading">Staff</h2>
+      <div class="char-row" id="staff-row"></div>
+    </section>
+
+    <section class="nt-container anime-section" id="anime-stats">
+      <h2 class="section-heading">Statistics</h2>
+      <div class="score-bars" id="score-bars"></div>
+    </section>
+
+    <section class="nt-container anime-section" id="anime-recommendations">
+      <h2 class="section-heading">Recommendations</h2>
+      <div class="browse-grid" id="rec-grid"></div>
+    </section>
+
+    <section class="nt-container anime-section" id="anime-relations">
+      <h2 class="section-heading">Relations</h2>
+      <div class="relation-pills" id="relation-pills"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="site-footer" role="contentinfo"></footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="module">
+    import { renderHeader, renderFooter, AnimeCard, EpisodeGrid, RatingStars, Toast, Modal, initHeaderInteractions } from './js/components.js';
+    import { jikan, jikanParallel } from './js/api.js';
+    import { getProfile, saveProfile, getRating, setRating, addToWatchlist, removeFromWatchlist, addToFavorites, removeFromFavorites, isInWatchlist, isInFavorites, getWatchlistStatus } from './js/storage.js';
+    import { setupIntersectionReveal, setupLazyImages, getParam, setTitle, setMetaDesc, setOgImage, escapeHtml, isPrivateMode, showPrivateBanner } from './js/utils.js';
+
+    document.getElementById('site-header').innerHTML = renderHeader('');
+    document.getElementById('site-footer').innerHTML = renderFooter();
+    initHeaderInteractions();
+    if (isPrivateMode()) showPrivateBanner();
+
+    const drawerNav = document.getElementById('drawer-nav');
+    if (drawerNav) {
+      drawerNav.innerHTML = `
+        <a href="home.html">Home</a>
+        <a href="discover.html">Discover</a>
+        <a href="search.html">Search</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="spotlight.html">Spotlight</a>
+        <a href="library.html">Library</a>
+        <a href="donate.html">Donate</a>
+        <hr style="border:none;border-top:1px solid var(--nt-border);margin:12px 0;">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      `;
+    }
+
+    const id = Number(getParam('id'));
+    if (!id || isNaN(id)) { window.location.replace('home.html'); }
+
+    let animeData = null;
+    let episodesData = [];
+    let currentLang = 'sub';
+
+    async function loadAnime() {
+      try {
+        const [full, eps, chars, staff, recs, pics, vids, stats] = await jikanParallel([
+          `/anime/${id}/full`,
+          `/anime/${id}/episodes?page=1`,
+          `/anime/${id}/characters`,
+          `/anime/${id}/staff`,
+          `/anime/${id}/recommendations`,
+          `/anime/${id}/pictures`,
+          `/anime/${id}/videos`,
+          `/anime/${id}/statistics`
+        ]);
+
+        animeData = full?.data;
+        if (!animeData) { window.location.replace('home.html'); return; }
+
+        setTitle(animeData.title);
+        setMetaDesc(animeData.synopsis);
+        setOgImage(animeData.images?.jpg?.large_image_url);
+
+        renderHero(animeData);
+        renderTrailer(vids?.data);
+        episodesData = eps?.data || [];
+        renderEpisodes();
+        renderDetails(animeData);
+        renderCharacters(chars?.data);
+        renderStaff(staff?.data);
+        renderStats(stats?.data);
+        renderRecommendations(recs?.data);
+        renderRelations(animeData.relations);
+        setupLazyImages();
+      } catch (e) {
+        document.getElementById('main-content').innerHTML = '<div class="nt-container" style="padding:80px 16px;text-align:center;"><h2>Failed to load anime.</h2><a href="home.html" class="nt-btn nt-btn-primary">Go Home</a></div>';
+      }
+    }
+
+    function renderHero(data) {
+      const bg = document.getElementById('anime-hero-bg');
+      const overlay = document.getElementById('anime-hero-overlay');
+      if (bg) bg.style.backgroundImage = `url('${data.images?.jpg?.large_image_url || ''}')`;
+      if (overlay) {
+        const inWl = isInWatchlist(id);
+        const inFav = isInFavorites(id);
+        const rating = getRating(id);
+        overlay.innerHTML = `
+          <img class="anime-poster" src="${data.images?.jpg?.image_url || ''}" alt="${data.title}">
+          <div class="anime-info">
+            <h1 class="anime-title">${data.title}</h1>
+            ${data.title_english && data.title_english !== data.title ? `<p class="anime-alt-title">${data.title_english}</p>` : ''}
+            <div class="anime-meta-pills">
+              <span class="meta-pill gold">Score ${data.score?.toFixed(1) || 'N/A'}</span>
+              <span class="meta-pill">Ranked #${data.rank || 'N/A'}</span>
+              <span class="meta-pill">Popularity #${data.popularity || 'N/A'}</span>
+              <span class="meta-pill">${data.status}</span>
+              <span class="meta-pill">${data.episodes || '?'} Ep</span>
+              <span class="meta-pill">${data.rating || 'N/A'}</span>
+            </div>
+            <div class="anime-genres">
+              ${(data.genres || []).map(g => `<a href="search.html?genres=${g.mal_id}" class="genre-tag">${g.name}</a>`).join('')}
+            </div>
+            <p class="anime-synopsis collapsed" id="synopsis-text">${data.synopsis || 'No synopsis available.'}</p>
+            <span class="synopsis-toggle" id="synopsis-toggle">Show more</span>
+            <div class="anime-actions">
+              <a href="watch.html?id=${id}&ep=1&lang=sub" class="nt-btn nt-btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Watch Now
+              </a>
+              <button class="nt-btn nt-btn-secondary ${inWl ? 'active' : ''}" id="btn-watchlist">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="${inWl ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg> ${inWl ? 'In Watchlist' : 'Add to Watchlist'}
+              </button>
+              <button class="nt-btn nt-btn-secondary ${inFav ? 'active' : ''}" id="btn-favorites">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="${inFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> ${inFav ? 'Favorited' : 'Add to Favorites'}
+              </button>
+            </div>
+            <div id="rating-container" style="margin-top:12px;">${RatingStars(id, rating)}</div>
+            ${data.broadcast?.string ? `<p style="font-size:13px;color:var(--nt-text-muted);margin-top:10px;">Airs ${data.broadcast.string}</p>` : ''}
+          </div>
+        `;
+
+        const synToggle = document.getElementById('synopsis-toggle');
+        const synText = document.getElementById('synopsis-text');
+        if (synToggle && synText) {
+          synToggle.addEventListener('click', () => {
+            synText.classList.toggle('collapsed');
+            synToggle.textContent = synText.classList.contains('collapsed') ? 'Show more' : 'Show less';
+          });
+        }
+
+        document.getElementById('btn-watchlist')?.addEventListener('click', () => {
+          const btn = document.getElementById('btn-watchlist');
+          if (isInWatchlist(id)) {
+            removeFromWatchlist(id);
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg> Add to Watchlist`;
+            btn.classList.remove('active');
+            Toast('Removed from watchlist', 'info');
+          } else {
+            addToWatchlist({ malId: id, title: data.title, posterUrl: data.images?.jpg?.image_url || '', score: data.score, totalEpisodes: data.episodes });
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg> In Watchlist`;
+            btn.classList.add('active');
+            Toast('Added to watchlist', 'success');
+          }
+        });
+
+        document.getElementById('btn-favorites')?.addEventListener('click', () => {
+          const btn = document.getElementById('btn-favorites');
+          if (isInFavorites(id)) {
+            removeFromFavorites(id);
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Add to Favorites`;
+            btn.classList.remove('active');
+            Toast('Removed from favorites', 'info');
+          } else {
+            addToFavorites({ malId: id, title: data.title, posterUrl: data.images?.jpg?.image_url || '', score: data.score });
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Favorited`;
+            btn.classList.add('active');
+            Toast('Added to favorites', 'success');
+          }
+        });
+
+        document.getElementById('rating-container')?.addEventListener('click', (e) => {
+          const btn = e.target.closest('.star-btn');
+          if (!btn) return;
+          const val = Number(btn.dataset.val);
+          setRating(id, val);
+          document.getElementById('rating-container').innerHTML = RatingStars(id, val);
+          Toast(`Rated ${val}/10`, 'success');
+        });
+      }
+    }
+
+    function renderTrailer(videos) {
+      const promo = videos?.promo?.[0];
+      const container = document.getElementById('anime-trailer');
+      if (!container || !promo?.trailer?.embed_url) return;
+      container.innerHTML = `
+        <h2 class="section-heading" style="margin-top:32px;">Trailer</h2>
+        <div class="trailer-container">
+          <div class="trailer-thumb" style="background:url('${promo.trailer.images?.maximum_image_url || promo.trailer.images?.default_image_url || ''}') center/cover no-repeat;">
+            <div class="trailer-play" id="trailer-play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('trailer-play')?.addEventListener('click', () => {
+        container.querySelector('.trailer-container').innerHTML = `<iframe src="${promo.trailer.embed_url}" allowfullscreen allow="autoplay; fullscreen" loading="lazy"></iframe>`;
+      });
+    }
+
+    function renderEpisodes() {
+      const container = document.getElementById('episodes-container');
+      if (!container) return;
+      container.innerHTML = EpisodeGrid(episodesData, null, id, currentLang);
+    }
+
+    document.getElementById('ep-sub')?.addEventListener('click', () => {
+      currentLang = 'sub';
+      document.getElementById('ep-sub').classList.add('active');
+      document.getElementById('ep-dub').classList.remove('active');
+    });
+    document.getElementById('ep-dub')?.addEventListener('click', () => {
+      currentLang = 'dub';
+      document.getElementById('ep-dub').classList.add('active');
+      document.getElementById('ep-sub').classList.remove('active');
+    });
+
+    function renderDetails(data) {
+      const table = document.getElementById('details-table');
+      if (!table) return;
+      const rows = [
+        ['Type', data.type || 'N/A'],
+        ['Source', data.source || 'N/A'],
+        ['Episodes', data.episodes || 'N/A'],
+        ['Status', data.status || 'N/A'],
+        ['Aired', data.aired?.string || 'N/A'],
+        ['Broadcast', data.broadcast?.string || 'N/A'],
+        ['Season', data.season ? `${data.season} ${data.year}` : 'N/A'],
+        ['Producers', (data.producers || []).map(p => p.name).join(', ') || 'N/A'],
+        ['Studios', (data.studios || []).map(s => s.name).join(', ') || 'N/A'],
+        ['Licensors', (data.licensors || []).map(l => l.name).join(', ') || 'N/A'],
+        ['Genres', (data.genres || []).map(g => g.name).join(', ') || 'N/A'],
+        ['Themes', (data.themes || []).map(t => t.name).join(', ') || 'N/A'],
+        ['Demographics', (data.demographics || []).map(d => d.name).join(', ') || 'N/A'],
+        ['Duration', data.duration || 'N/A'],
+        ['Rating', data.rating || 'N/A']
+      ];
+      table.innerHTML = rows.map(([label, value]) => `
+        <div class="detail-row">
+          <span class="detail-label">${label}</span>
+          <span class="detail-value">${value}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderCharacters(data) {
+      const row = document.getElementById('char-row');
+      if (!row) return;
+      const items = (data || []).slice(0, 12);
+      if (!items.length) { row.innerHTML = '<p class="empty-state">No character data.</p>'; return; }
+      row.innerHTML = items.map(item => `
+        <div class="char-card">
+          <img class="char-img" src="${item.character?.images?.jpg?.image_url || ''}" alt="${item.character?.name || ''}" loading="lazy">
+          <div class="char-name">${item.character?.name || ''}</div>
+          <div class="char-role">${item.role || ''}</div>
+          ${item.voice_actors?.[0] ? `<div class="char-va">${item.voice_actors[0].person?.name || ''}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderStaff(data) {
+      const row = document.getElementById('staff-row');
+      if (!row) return;
+      const items = (data || []).slice(0, 12);
+      if (!items.length) { row.innerHTML = '<p class="empty-state">No staff data.</p>'; return; }
+      row.innerHTML = items.map(item => `
+        <div class="char-card">
+          <img class="char-img" src="${item.person?.images?.jpg?.image_url || ''}" alt="${item.person?.name || ''}" loading="lazy">
+          <div class="char-name">${item.person?.name || ''}</div>
+          <div class="char-role">${(item.positions || []).slice(0, 2).join(', ')}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderStats(data) {
+      const bars = document.getElementById('score-bars');
+      if (!bars || !data?.scores) { if (bars) bars.innerHTML = '<p class="empty-state">No statistics.</p>'; return; }
+      const scores = data.scores;
+      const max = Math.max(...scores.map(s => s.votes || 0));
+      bars.innerHTML = scores.map(s => `
+        <div class="score-bar-row">
+          <span class="score-bar-label">${s.score}</span>
+          <div class="score-bar-track">
+            <div class="score-bar-fill" style="width:${max ? (s.votes / max) * 100 : 0}%"></div>
+          </div>
+          <span class="score-bar-count">${s.votes?.toLocaleString() || 0}</span>
+        </div>
+      `).join('');
+      if (data.total) {
+        bars.insertAdjacentHTML('beforeend', `<p style="margin-top:8px;font-size:13px;color:var(--nt-text-muted);">Total votes: ${data.total.toLocaleString()}</p>`);
+      }
+    }
+
+    function renderRecommendations(data) {
+      const grid = document.getElementById('rec-grid');
+      if (!grid) return;
+      const items = (data || []).slice(0, 8);
+      if (!items.length) { grid.innerHTML = '<p class="empty-state">No recommendations.</p>'; return; }
+      grid.innerHTML = items.map(item => AnimeCard(item.entry, { size: 'lg' })).join('');
+    }
+
+    function renderRelations(relations) {
+      const pills = document.getElementById('relation-pills');
+      if (!pills || !relations) return;
+      const entries = relations.flatMap(r => r.entry?.map(e => ({ ...e, relation: r.relation })) || []);
+      if (!entries.length) { pills.innerHTML = '<p class="empty-state">No relations.</p>'; return; }
+      pills.innerHTML = entries.slice(0, 12).map(e => `
+        <a href="anime.html?id=${e.mal_id}" class="relation-pill">${e.relation}: ${e.name}</a>
+      `).join('');
+    }
+
+    loadAnime();
+    setupIntersectionReveal();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
